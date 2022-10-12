@@ -34,7 +34,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     (void)ip_header;
     (void)arp_header;
 
-    printf("\n--------------------------------------------------\n");
+    printf("\n\n");
 }
 
 int main(int argc, char **argv) {
