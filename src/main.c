@@ -1,3 +1,4 @@
+#include "../include/bootp.h"
 #include "../include/ethernet.h"
 #include "../include/include.h"
 #include "../include/ip_arp_rarp.h"
@@ -10,30 +11,30 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     struct ether_header *eth_header = ethernet_analyzer(packet);
 
     // Protocol
+    struct ip *ip_header;
+    struct ether_arp *arp_header;
+
     switch (htons(eth_header->ether_type)) {
 
     case ETHERTYPE_IP:
-        ip_analyzer(packet);
+        ip_header = ip_analyzer(packet);
         break;
 
     case ETHERTYPE_ARP:
-        arp_analyzer(packet);
+        arp_header = arp_analyzer(packet);
         break;
 
     case ETHERTYPE_REVARP:
-        // rarp_analyzer(packet, eth_header);
         break;
 
     default:
         printf("Unknown protocol\n");
     }
 
-    // affichage paquet
-    // for (int i = 0; i < header->caplen; i++) {
-    //     printf("%02x ", packet[i]);
-    // }
+    (void)ip_header;
+    (void)arp_header;
 
-    printf("\n");
+    printf("\n--------------------------------------------------\n");
 }
 
 int main(int argc, char **argv) {
