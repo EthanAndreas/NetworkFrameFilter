@@ -22,11 +22,10 @@ struct ether_header *ethernet_analyzer(const u_char *packet) {
     static char buf[18];
     struct ether_header *eth_header = (struct ether_header *)packet;
 
-    printf("Ethernet Header :\n");
-    printf("Address MAC source : %s, ",
+    printf("Ethernet Header :\n"
+           "Address MAC source : %s, Address MAC destination : %s\n",
            ether_ntoa_r((struct ether_addr *)eth_header->ether_shost,
-                        buf));
-    printf("Address MAC destination : %s\n",
+                        buf),
            ether_ntoa_r((struct ether_addr *)eth_header->ether_dhost,
                         buf));
 

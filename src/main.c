@@ -24,8 +24,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
         arp_header = arp_analyzer(packet);
         break;
 
-    case ETHERTYPE_REVARP:
-        break;
+    case ETHERTYPE_LOOPBACK:
 
     default:
         printf("Unknown protocol\n");
@@ -33,6 +32,15 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
 
     (void)ip_header;
     (void)arp_header;
+
+    // print paquet
+    // for (int i = 0; i < header->len; i++) {
+
+    //     if (i % 16 == 0)
+    //         printf("\n");
+
+    //     printf("%i", packet[i]);
+    // }
 
     printf("\n\n");
 }
@@ -65,10 +73,12 @@ int main(int argc, char **argv) {
 
         if ((handle = pcap_open_offline(usage->file, errbuf)) ==
             NULL) {
-
             fprintf(stderr, "%s\n", errbuf);
             exit(1);
         }
+
+        pcap_loop(handle, -1, got_packet, NULL);
+
     } else {
 
         fprintf(stderr, "Error : No option chosen\n");
