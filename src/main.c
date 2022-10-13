@@ -16,6 +16,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     struct ip *ip_header;
     struct ether_arp *arp_header;
     struct tcphdr *tcp_header;
+    struct udphdr *udp_header;
 
     switch (htons(eth_header->ether_type)) {
 
@@ -25,8 +26,8 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
         if (ip_header->ip_p == IPPROTO_TCP)
             tcp_header = tcp_analyzer(packet, ip_header);
 
-        // if (ip_header->ip_p == IPPROTO_UDP)
-        // udp_analyzer(packet);
+        if (ip_header->ip_p == IPPROTO_UDP)
+            udp_header = udp_analyzer(packet, ip_header);
 
         break;
 
@@ -39,6 +40,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     }
 
     (void)tcp_header;
+    (void)udp_header;
     (void)arp_header;
 
     // print paquet

@@ -8,6 +8,7 @@
         "if_ether.h": "c",
         "stdint.h": "c",
         "features.h": "c",
-        "tcp.h": "c"
+        "tcp.h": "c",
+        "udp.h": "c"
     }
 }
