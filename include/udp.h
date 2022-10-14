@@ -1,6 +1,6 @@
 #include "../include/include.h"
 
-struct tcphdr *tcp_analyzer(const u_char *packet,
-                            struct ip *ip_header);
+int get_protocol_udp(const u_char *packet, struct udphdr *udp_header);
+
 struct udphdr *udp_analyzer(const u_char *packet,
                             struct ip *ip_header);

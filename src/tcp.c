@@ -1,4 +1,18 @@
-#include "../include/transport_layer.h"
+#include "../include/tcp.h"
+
+int get_protocol_tcp(const u_char *packet,
+                     struct tcphdr *tcp_header) {
+
+    if (ntohs(tcp_header->th_dport) == DNS_PORT ||
+        ntohs(tcp_header->th_sport) == DNS_PORT)
+        return DNS_PORT;
+
+    if (ntohs(tcp_header->th_dport) == BOOTP_PORT ||
+        ntohs(tcp_header->th_sport) == BOOTP_PORT)
+        return BOOTP_PORT;
+
+    return 0;
+}
 
 struct tcphdr *tcp_analyzer(const u_char *packet,
                             struct ip *ip_header) {
@@ -26,15 +40,4 @@ struct tcphdr *tcp_analyzer(const u_char *packet,
     printf("\n");
 
     return tcp_header;
-}
-
-struct udphdr *udp_analyzer(const u_char *packet,
-                            struct ip *ip_header) {
-
-    struct udphdr *udp_header = (struct udphdr *)packet;
-
-    printf("Source port : %d, Destination port : %d\n",
-           ntohs(udp_header->uh_sport), ntohs(udp_header->uh_dport));
-
-    return udp_header;
 }

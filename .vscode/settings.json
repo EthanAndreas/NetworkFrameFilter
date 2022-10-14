@@ -9,6 +9,7 @@
         "stdint.h": "c",
         "features.h": "c",
         "tcp.h": "c",
-        "udp.h": "c"
+        "udp.h": "c",
+        "application_layer.h": "c"
     }
 }
