@@ -14,6 +14,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
 
     // Ethernet Header
     struct ether_header *eth_header = ethernet_analyzer(packet);
+    // keep the packet without the ethernet header
     packet += sizeof(struct ether_header);
 
     // Network Layer
@@ -24,43 +25,48 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     struct tcphdr *tcp_header;
     struct udphdr *udp_header;
 
+    // Get the network protocol
     switch (htons(eth_header->ether_type)) {
 
     case ETHERTYPE_IP:
+
+        // IP Header
         ip_header = ip_analyzer(packet);
+        // keep the packet without the ip header
         packet += (ip_header->ip_hl * 4);
 
+        // Get the transport protocol
         if (ip_header->ip_p == IPPROTO_TCP) {
 
+            // TCP Header
             tcp_header = tcp_analyzer(packet, ip_header);
+            // keep the packet without the tcp header
             packet += tcp_header->th_off;
 
-            if (get_protocol_tcp(packet, tcp_header) == DNS_PORT)
-                dns_analyzer(packet);
-            else if (get_protocol_tcp(packet, tcp_header) ==
-                     BOOTP_PORT)
-                bootp_analyzer(packet);
-        }
+            // Get the application protocol
+            get_protocol_tcp(packet, tcp_header);
 
-        if (ip_header->ip_p == IPPROTO_UDP) {
+        } else if (ip_header->ip_p == IPPROTO_UDP) {
 
+            // UDP Header
             udp_header = udp_analyzer(packet, ip_header);
+            // keep the packet without the udp header
             packet += sizeof(struct udphdr);
 
-            if (get_protocol_udp(packet, udp_header) == DNS_PORT)
-                dns_analyzer(packet);
-            else if (get_protocol_udp(packet, udp_header) ==
-                     BOOTP_PORT)
-                bootp_analyzer(packet);
+            // Get the application protocol
+            get_protocol_udp(packet, udp_header);
         }
 
         break;
-
     case ETHERTYPE_ARP:
-        arp_header = arp_analyzer(packet);
-        break;
 
+        // ARP Header
+        arp_header = arp_analyzer(packet);
+        // keep the packet without the arp header
+        packet += sizeof(struct ether_arp);
+        break;
     default:
+        // For protocols that are not supported
         printf("Unknown protocol\n");
     }
 
@@ -72,8 +78,6 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     //     if ((i + 1) % 16 == 0)
     //         printf("\n");
     // }
-
-    printf("\n\n");
 }
 
 int main(int argc, char **argv) {

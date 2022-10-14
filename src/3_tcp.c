@@ -1,17 +1,15 @@
 #include "../include/3_tcp.h"
 
-int get_protocol_tcp(const u_char *packet,
-                     struct tcphdr *tcp_header) {
+void get_protocol_tcp(const u_char *packet,
+                      struct tcphdr *tcp_header) {
 
     if (ntohs(tcp_header->th_dport) == DNS_PORT ||
         ntohs(tcp_header->th_sport) == DNS_PORT)
-        return DNS_PORT;
+        dns_analyzer(packet);
 
     if (ntohs(tcp_header->th_dport) == BOOTP_PORT ||
         ntohs(tcp_header->th_sport) == BOOTP_PORT)
-        return BOOTP_PORT;
-
-    return 0;
+        bootp_analyzer(packet);
 }
 
 struct tcphdr *tcp_analyzer(const u_char *packet,

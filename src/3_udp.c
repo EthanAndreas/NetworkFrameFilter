@@ -1,17 +1,15 @@
 #include "../include/3_udp.h"
 
-int get_protocol_udp(const u_char *packet,
-                     struct udphdr *udp_header) {
+void get_protocol_udp(const u_char *packet,
+                      struct udphdr *udp_header) {
 
     if (ntohs(udp_header->uh_dport) == DNS_PORT ||
         ntohs(udp_header->uh_sport) == DNS_PORT)
-        return DNS_PORT;
+        dns_analyzer(packet);
 
     if (ntohs(udp_header->uh_dport) == BOOTP_PORT ||
         ntohs(udp_header->uh_sport) == BOOTP_PORT)
-        return BOOTP_PORT;
-
-    return 0;
+        bootp_analyzer(packet);
 }
 
 struct udphdr *udp_analyzer(const u_char *packet,
