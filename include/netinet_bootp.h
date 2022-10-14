@@ -55,6 +55,8 @@ struct bootp {
 #define BOOTREPLY 2
 #define BOOTREQUEST 1
 
+#define HTYPE_ETHER 1
+
 /*
  * Vendor magic cookie (v_magic) for CMU
  */
