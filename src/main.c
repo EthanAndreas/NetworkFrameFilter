@@ -11,6 +11,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
 
     // Ethernet Header
     struct ether_header *eth_header = ethernet_analyzer(packet);
+    packet += sizeof(struct ether_header);
 
     // Protocol
     struct ip *ip_header;
@@ -22,12 +23,35 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
 
     case ETHERTYPE_IP:
         ip_header = ip_analyzer(packet);
+        packet += (ip_header->ip_hl * 4);
 
-        if (ip_header->ip_p == IPPROTO_TCP)
+        if (ip_header->ip_p == IPPROTO_TCP) {
+
             tcp_header = tcp_analyzer(packet, ip_header);
+            packet += tcp_header->th_off;
 
-        if (ip_header->ip_p == IPPROTO_UDP)
+            if (ntohs(tcp_header->th_dport) == DNS_PORT ||
+                ntohs(tcp_header->th_sport) == DNS_PORT)
+                dns_analyzer(packet, tcp_header->th_off * 4);
+
+            if (ntohs(tcp_header->th_dport) == BOOTP_PORT ||
+                ntohs(tcp_header->th_sport) == BOOTP_PORT)
+                bootp_analyzer(packet, tcp_header->th_off * 4);
+        }
+
+        if (ip_header->ip_p == IPPROTO_UDP) {
+
             udp_header = udp_analyzer(packet, ip_header);
+            packet += sizeof(struct udphdr);
+
+            if (ntohs(udp_header->uh_dport) == DNS_PORT ||
+                ntohs(udp_header->uh_sport) == DNS_PORT)
+                dns_analyzer(packet, udp_header->uh_ulen * 4);
+
+            if (ntohs(udp_header->uh_dport) == BOOTP_PORT ||
+                ntohs(udp_header->uh_sport) == BOOTP_PORT)
+                bootp_analyzer(packet, udp_header->uh_ulen * 4);
+        }
 
         break;
 
@@ -39,8 +63,6 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
         printf("Unknown protocol\n");
     }
 
-    (void)tcp_header;
-    (void)udp_header;
     (void)arp_header;
 
     // print paquet

@@ -3,8 +3,7 @@
 struct tcphdr *tcp_analyzer(const u_char *packet,
                             struct ip *ip_header) {
 
-    struct tcphdr *tcp_header =
-        (struct tcphdr *)(packet + ip_header->ip_hl);
+    struct tcphdr *tcp_header = (struct tcphdr *)packet;
 
     printf("Source port : %d, Destination port : %d\n"
            "Data offset : %d, Flags :",
@@ -32,8 +31,7 @@ struct tcphdr *tcp_analyzer(const u_char *packet,
 struct udphdr *udp_analyzer(const u_char *packet,
                             struct ip *ip_header) {
 
-    struct udphdr *udp_header =
-        (struct udphdr *)(packet + ip_header->ip_hl);
+    struct udphdr *udp_header = (struct udphdr *)packet;
 
     printf("Source port : %d, Destination port : %d\n",
            ntohs(udp_header->uh_sport), ntohs(udp_header->uh_dport));

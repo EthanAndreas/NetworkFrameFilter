@@ -8,5 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define DNS_PORT 53
+#define BOOTP_PORT 67
+
 // Lien des assets
 // packetlife.net/captures/protocol/
