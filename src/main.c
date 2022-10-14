@@ -1,11 +1,13 @@
-#include "../include/bootp.h"
-#include "../include/dns.h"
-#include "../include/ethernet.h"
+#include "../include/1_ethernet.h"
+#include "../include/2_arp.h"
+#include "../include/2_ip.h"
+#include "../include/3_tcp.h"
+#include "../include/3_udp.h"
+#include "../include/4_bootp.h"
+#include "../include/4_dns.h"
+
 #include "../include/include.h"
-#include "../include/network_layer.h"
 #include "../include/option.h"
-#include "../include/tcp.h"
-#include "../include/udp.h"
 
 void got_packet(u_char *args, const struct pcap_pkthdr *header,
                 const u_char *packet) {

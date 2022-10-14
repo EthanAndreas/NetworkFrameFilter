@@ -22,6 +22,9 @@
  * or implied warranty.
  */
 
+#ifndef BOOTP_STRUCT
+#define BOOTP_STRUCT
+
 #include <netinet/ip.h>
 #include <sys/types.h>
 
@@ -216,3 +219,5 @@ struct cmu_vend {
 
 /* v_flags values */
 #define VF_SMASK 1 /* Subnet mask field contains valid data */
+
+#endif

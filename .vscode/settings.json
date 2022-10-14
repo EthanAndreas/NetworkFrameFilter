@@ -10,6 +10,7 @@
         "features.h": "c",
         "tcp.h": "c",
         "udp.h": "c",
-        "application_layer.h": "c"
+        "application_layer.h": "c",
+        "stdlib.h": "c"
     }
 }

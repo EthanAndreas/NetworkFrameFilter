@@ -1,4 +1,4 @@
-#include "../include/ethernet.h"
+#include "../include/1_ethernet.h"
 
 char *ether_ntoa_r(const struct ether_addr *addr, char *buf) {
 

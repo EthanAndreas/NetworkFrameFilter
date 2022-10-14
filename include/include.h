@@ -1,3 +1,6 @@
+#ifndef INCLUDE_H
+#define INCLUDE_H
+
 #include <getopt.h>
 #include <net/ethernet.h>
 #include <netinet/ether.h>
@@ -7,6 +10,8 @@
 #include <pcap.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "../include/netinet_bootp.h"
 
 // Protocol
 #define DATA_FTP 20
@@ -19,6 +24,8 @@
 #define DNS_PORT 53
 #define BOOTP_PORT 67
 #define HTTP_PORT 80
+
+#endif
 
 // Lien des assets
 // packetlife.net/captures/protocol/
