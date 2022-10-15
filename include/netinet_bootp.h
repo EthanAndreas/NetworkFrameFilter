@@ -194,6 +194,9 @@ struct bootp {
 #define TAG_EXTENDED_REQUEST ((u_int8_t)126)
 #define TAG_EXTENDED_OPTION ((u_int8_t)127)
 
+// Personnal add
+#define TAG_SIP_SERVER ((u_int8_t)120)
+
 /* DHCP Message types (values for TAG_DHCP_MESSAGE option) */
 #define DHCPDISCOVER 1
 #define DHCPOFFER 2
