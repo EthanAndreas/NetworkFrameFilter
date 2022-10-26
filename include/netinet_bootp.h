@@ -33,7 +33,7 @@ struct bootp {
     u_int8_t bp_htype;        /* hardware addr type */
     u_int8_t bp_hlen;         /* hardware addr length */
     u_int8_t bp_hops;         /* gateway hops */
-    u_int32_t bp_xid;         /* transaction ID */
+    u_int8_t bp_xid[4];       /* transaction ID */
     u_int16_t bp_secs;        /* seconds since boot began */
     u_int16_t bp_flags;       /* flags: 0x8000 is broadcast */
     struct in_addr bp_ciaddr; /* client IP address */

@@ -73,8 +73,6 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     }
 
     (void)arp_header;
-
-    printf("\n");
 }
 
 int main(int argc, char **argv) {

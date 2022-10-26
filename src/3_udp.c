@@ -17,6 +17,8 @@ struct udphdr *udp_analyzer(const u_char *packet,
 
     struct udphdr *udp_header = (struct udphdr *)packet;
 
+    PRV1(printf(GRN "UDP Header" NC "\n"), verbose);
+
     PRV1(printf("Source port : %d, Destination port : %d\n",
                 ntohs(udp_header->uh_sport),
                 ntohs(udp_header->uh_dport)),

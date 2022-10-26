@@ -17,6 +17,8 @@ struct tcphdr *tcp_analyzer(const u_char *packet,
 
     struct tcphdr *tcp_header = (struct tcphdr *)packet;
 
+    PRV1(printf(GRN "TCP Header" NC "\n"), verbose);
+
     PRV1(printf("Source port : %d, Destination port : %d\n",
                 ntohs(tcp_header->th_sport),
                 ntohs(tcp_header->th_dport)),
