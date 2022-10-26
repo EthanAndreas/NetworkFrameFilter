@@ -5,12 +5,48 @@ void bootp_analyzer(const u_char *packet, int verbose) {
     struct bootp *bootp_header = (struct bootp *)packet;
 
     if (bootp_header->bp_op == BOOTREQUEST)
-        printf("Request, ");
+        PRV1(printf("Request, "), verbose);
     else if (bootp_header->bp_op == BOOTREPLY)
-        printf("Reply, ");
+        PRV1(printf("Reply, "), verbose);
 
     if (bootp_header->bp_htype == HTYPE_ETHER)
-        printf("Ethernet, ");
+        PRV1(printf("Ethernet, "), verbose);
+
+    PRV2(printf("Server IP address : %s, "
+                "Gateway IP address : %s, ",
+                inet_ntoa(bootp_header->bp_siaddr),
+                inet_ntoa(bootp_header->bp_giaddr)),
+         verbose);
+
+    PRV3(printf("Hardware address length : %d\n"
+                "Transaction ID : %d\n",
+                bootp_header->bp_hlen, bootp_header->bp_xid),
+         verbose);
+
+    PRV3(printf("Seconds since boot began : %d\n",
+                bootp_header->bp_secs),
+         verbose);
+
+    PRV3(printf("Flags : %d\n", bootp_header->bp_flags), verbose);
+
+    PRV3(printf("Client IP address : %s\n",
+                inet_ntoa(bootp_header->bp_ciaddr)),
+         verbose);
+
+    PRV3(printf("Your IP address : %s\n",
+                inet_ntoa(bootp_header->bp_yiaddr)),
+         verbose);
+
+    PRV3(printf("Client hardware address : %s\n",
+                ether_ntoa(
+                    (struct ether_addr *)bootp_header->bp_chaddr)),
+         verbose);
+
+    PRV3(printf("Server host name : %s\n", bootp_header->bp_sname),
+         verbose);
+
+    PRV3(printf("Boot file name : %s\n", bootp_header->bp_file),
+         verbose);
 
     bootp_vendor_specific(bootp_header->bp_vend, verbose);
 }
@@ -72,7 +108,7 @@ void bootp_vendor_specific(uint8_t bp_vend[64], int verbose) {
     /*
     problème sur tftp au niveau du contenu
     problème sur agent remote : detecté au mauvais endroit
-    */
+    *
 
     /*
     objectif : faire une première analyse pour récupérer la taille de
@@ -81,7 +117,7 @@ void bootp_vendor_specific(uint8_t bp_vend[64], int verbose) {
 
     if (bp_vend[0] == 0x63 && bp_vend[1] == 0x82 &&
         bp_vend[2] == 0x53 && bp_vend[3] == 0x63) {
-        PRV1(printf("DHCP protocol\n"), verbose);
+        PRV3(printf("DHCP protocol\n"), verbose);
     }
 
     int i = 0, j;

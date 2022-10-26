@@ -1,39 +1,42 @@
 #include "../include/3_tcp.h"
 
-void get_protocol_tcp(const u_char *packet,
-                      struct tcphdr *tcp_header) {
+void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
+                      int verbose) {
 
     if (ntohs(tcp_header->th_dport) == DNS_PORT ||
         ntohs(tcp_header->th_sport) == DNS_PORT)
-        dns_analyzer(packet);
+        dns_analyzer(packet, verbose);
 
     if (ntohs(tcp_header->th_dport) == BOOTP_PORT ||
         ntohs(tcp_header->th_sport) == BOOTP_PORT)
-        bootp_analyzer(packet, 1);
+        bootp_analyzer(packet, verbose);
 }
 
 struct tcphdr *tcp_analyzer(const u_char *packet,
-                            struct ip *ip_header) {
+                            struct ip *ip_header, int verbose) {
 
     struct tcphdr *tcp_header = (struct tcphdr *)packet;
 
-    printf("Source port : %d, Destination port : %d\n"
-           "Data offset : %d, Flags :",
-           ntohs(tcp_header->th_sport), ntohs(tcp_header->th_dport),
-           tcp_header->th_off);
+    PRV1(printf("Source port : %d, Destination port : %d\n",
+                ntohs(tcp_header->th_sport),
+                ntohs(tcp_header->th_dport)),
+         verbose);
+
+    PRV2(printf("Data offset : % d, Flags : ", tcp_header->th_off),
+         verbose);
 
     if (tcp_header->th_flags & TH_SYN)
-        printf(", SYN");
+        PRV2(printf(", SYN"), verbose);
     if (tcp_header->th_flags & TH_ACK)
-        printf(", ACK");
+        PRV2(printf(", ACK"), verbose);
     if (tcp_header->th_flags & TH_FIN)
-        printf(", FIN");
+        PRV2(printf(", FIN"), verbose);
     if (tcp_header->th_flags & TH_RST)
-        printf(", RST");
+        PRV2(printf(", RST"), verbose);
     if (tcp_header->th_flags & TH_PUSH)
-        printf(", PUSH");
+        PRV2(printf(", PUSH"), verbose);
     if (tcp_header->th_flags & TH_URG)
-        printf(", URG");
+        PRV2(printf(", URG"), verbose);
 
     printf("\n");
 

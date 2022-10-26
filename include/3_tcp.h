@@ -5,9 +5,9 @@
 #include "../include/4_dns.h"
 #include "../include/include.h"
 
-void get_protocol_tcp(const u_char *packet,
-                      struct tcphdr *tcp_header);
+void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
+                      int verbose);
 struct tcphdr *tcp_analyzer(const u_char *packet,
-                            struct ip *ip_header);
+                            struct ip *ip_header, int verbose);
 
 #endif

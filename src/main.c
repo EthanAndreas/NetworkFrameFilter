@@ -12,6 +12,8 @@
 void got_packet(u_char *args, const struct pcap_pkthdr *header,
                 const u_char *packet) {
 
+    int verbose = 1;
+
     // Ethernet Header
     struct ether_header *eth_header = ethernet_analyzer(packet);
     // keep the packet without the ethernet header
@@ -31,7 +33,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     case ETHERTYPE_IP:
 
         // IP Header
-        ip_header = ip_analyzer(packet);
+        ip_header = ip_analyzer(packet, verbose);
         // keep the packet without the ip header
         packet += (ip_header->ip_hl * 4);
 
@@ -39,29 +41,29 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
         if (ip_header->ip_p == IPPROTO_TCP) {
 
             // TCP Header
-            tcp_header = tcp_analyzer(packet, ip_header);
+            tcp_header = tcp_analyzer(packet, ip_header, verbose);
             // keep the packet without the tcp header
             packet += tcp_header->th_off;
 
             // Get the application protocol
-            get_protocol_tcp(packet, tcp_header);
+            get_protocol_tcp(packet, tcp_header, verbose);
 
         } else if (ip_header->ip_p == IPPROTO_UDP) {
 
             // UDP Header
-            udp_header = udp_analyzer(packet, ip_header);
+            udp_header = udp_analyzer(packet, ip_header, verbose);
             // keep the packet without the udp header
             packet += sizeof(struct udphdr);
 
             // Get the application protocol
-            get_protocol_udp(packet, udp_header);
+            get_protocol_udp(packet, udp_header, verbose);
         }
 
         break;
     case ETHERTYPE_ARP:
 
         // ARP Header
-        arp_header = arp_analyzer(packet);
+        arp_header = arp_analyzer(packet, verbose);
         // keep the packet without the arp header
         packet += sizeof(struct ether_arp);
         break;
@@ -71,13 +73,6 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     }
 
     (void)arp_header;
-
-    // print paquet
-    // for (int i = 0; i < header->len; i++) {
-    //     printf("%02x ", packet[i]);
-    //     if ((i + 1) % 16 == 0)
-    //         printf("\n");
-    // }
 
     printf("\n");
 }

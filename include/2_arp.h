@@ -3,6 +3,6 @@
 
 #include "../include/include.h"
 
-struct ether_arp *arp_analyzer(const u_char *packet);
+struct ether_arp *arp_analyzer(const u_char *packet, int verbose);
 
 #endif

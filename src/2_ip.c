@@ -1,20 +1,26 @@
 #include "../include/2_ip.h"
 
-struct ip *ip_analyzer(const u_char *packet) {
+struct ip *ip_analyzer(const u_char *packet, int verbose) {
 
     struct ip *ip = (struct ip *)packet;
 
-    printf("IP version : %d, IP Size: %d, Thread size : %d, ",
-           ip->ip_v, ip->ip_hl, ip->ip_len);
+    PRV1(printf("IP version : %d", ip->ip_v), verbose);
 
     if (ip->ip_p == IPPROTO_TCP)
-        printf("Protocol : TCP\n");
+        PRV1(printf(", Protocol : TCP"), verbose);
 
     if (ip->ip_p == IPPROTO_UDP)
-        printf("Protocol : UDP\n");
+        PRV1(printf(", Protocol : UDP"), verbose);
 
-    printf("Address IP source : %s, Address IP destination : %s\n",
-           inet_ntoa(ip->ip_src), inet_ntoa(ip->ip_dst));
+    PRV1(
+        printf(
+            ", Address IP source : %s, Address IP destination : %s\n",
+            inet_ntoa(ip->ip_src), inet_ntoa(ip->ip_dst)),
+        verbose);
+
+    PRV2(printf("IP Size: %d, Thread size : %d\n", ip->ip_hl,
+                ip->ip_len),
+         verbose);
 
     return ip;
 }
