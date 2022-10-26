@@ -78,6 +78,8 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     //     if ((i + 1) % 16 == 0)
     //         printf("\n");
     // }
+
+    printf("\n");
 }
 
 int main(int argc, char **argv) {

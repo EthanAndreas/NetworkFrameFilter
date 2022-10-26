@@ -1,6 +1,6 @@
 #include "../include/4_bootp.h"
 
-void bootp_analyzer(const u_char *packet) {
+void bootp_analyzer(const u_char *packet, int verbose) {
 
     struct bootp *bootp_header = (struct bootp *)packet;
 
@@ -12,7 +12,7 @@ void bootp_analyzer(const u_char *packet) {
     if (bootp_header->bp_htype == HTYPE_ETHER)
         printf("Ethernet, ");
 
-    bootp_vendor_specific(bootp_header->bp_vend);
+    bootp_vendor_specific(bootp_header->bp_vend, verbose);
 }
 
 /**
@@ -67,16 +67,21 @@ void print_dhcp_option_int(uint8_t bp_vend[64], int i) {
  * There is a lot of line, they all print options and their content
  * which can be an IP address, a name or a number.
  */
-void bootp_vendor_specific(uint8_t bp_vend[64]) {
+void bootp_vendor_specific(uint8_t bp_vend[64], int verbose) {
 
     /*
     problème sur tftp au niveau du contenu
     problème sur agent remote : detecté au mauvais endroit
     */
 
+    /*
+    objectif : faire une première analyse pour récupérer la taille de
+    la trame avec TAG_END et ensuite détecter les options
+    */
+
     if (bp_vend[0] == 0x63 && bp_vend[1] == 0x82 &&
         bp_vend[2] == 0x53 && bp_vend[3] == 0x63) {
-        printf("DHCP protocol\n");
+        PRV1(printf("DHCP protocol\n"), verbose);
     }
 
     int i = 0, j;
@@ -89,361 +94,364 @@ void bootp_vendor_specific(uint8_t bp_vend[64]) {
 
         // RFC1048
         case TAG_SUBNET_MASK:
-            printf("Subnet mask : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Subnet mask : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_TIME_OFFSET:
-            printf("Time offset : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Time offset : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += 5;
             break;
         case TAG_GATEWAY:
-            printf("Router : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Router : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_TIME_SERVER:
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NAME_SERVER:
-            printf("Name server : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Name server : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_DOMAIN_SERVER:
-            printf("DNS : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("DNS : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_LOG_SERVER:
-            printf("Log server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Log server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_COOKIE_SERVER:
-            printf("Cookie server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Cookie server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_LPR_SERVER:
-            printf("LPR server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("LPR server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_IMPRESS_SERVER:
-            printf("Impress server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Impress server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_RLP_SERVER:
-            printf("RLP server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("RLP server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_HOSTNAME:
-            printf("Hostname : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Hostname : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_BOOTSIZE:
-            printf("Boot size : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Boot size : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
 
         // RFC1497
         case TAG_DUMPPATH:
-            printf("Dump path : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Dump path : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_DOMAINNAME:
-            printf("Domain name : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Domain name : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_SWAP_SERVER:
-            printf("Swap server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Swap server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_ROOTPATH:
-            printf("Root path : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Root path : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_EXTPATH:
-            printf("Extension path : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Extension path : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
 
         // RFC2132
         case TAG_IP_FORWARD:
-            printf("IP forward : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("IP forward : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NL_SRCRT:
-            printf("Non-local source routing : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Non-local source routing : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_PFILTERS:
-            printf("Policy filters : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Policy filters : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_REASS_SIZE:
-            printf("Maximum datagram reassembly size : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Maximum datagram reassembly size : "),
+                 verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_DEF_TTL:
-            printf("Default IP time-to-live : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Default IP time-to-live : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_MTU_TIMEOUT:
-            printf("Path MTU aging timeout : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Path MTU aging timeout : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_MTU_TABLE:
-            printf("MTU table : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("MTU table : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_INT_MTU:
-            printf("Interface MTU : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Interface MTU : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_LOCAL_SUBNETS:
-            printf("All subnets are local : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("All subnets are local : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_BROAD_ADDR:
-            printf("Broadcast : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Broadcast : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_DO_MASK_DISC:
-            printf("Perform mask discovery : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Perform mask discovery : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_SUPPLY_MASK:
-            printf("Supply mask to other hosts : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Supply mask to other hosts : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_DO_RDISC:
-            printf("Perform router discovery : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Perform router discovery : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_RTR_SOL_ADDR:
-            printf("Router solicitation address : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Router solicitation address : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_STATIC_ROUTE:
-            printf("Static route : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Static route : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_USE_TRAILERS:
-            printf("Trailer encapsulation : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Trailer encapsulation : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_ARP_TIMEOUT:
-            printf("ARP cache timeout : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("ARP cache timeout : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_ETH_ENCAP:
-            printf("Ethernet encapsulation : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Ethernet encapsulation : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_TCP_TTL:
-            printf("TCP default TTL : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("TCP default TTL : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_TCP_KEEPALIVE:
-            printf("TCP keepalive interval : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("TCP keepalive interval : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_KEEPALIVE_GO:
-            printf("TCP keepalive garbage : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("TCP keepalive garbage : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NIS_DOMAIN:
-            printf("NIS domain : ");
-            print_dhcp_option_name(bp_vend, i);
-            i += bp_vend[i + 1] + 1;
+            PRV3(printf("NIS domain : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             break;
+            i += bp_vend[i + 1] + 1;
         case TAG_NIS_SERVERS:
-            printf("NIS servers : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("NIS servers : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NTP_SERVERS:
-            printf("NTP servers : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("NTP servers : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_VENDOR_OPTS:
-            printf("Vendor specific information : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Vendor specific information : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NETBIOS_NS:
-            printf("Netbios name server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Netbios name server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NETBIOS_DDS:
-            printf("Netbios datagram distribution server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Netbios datagram distribution server : "),
+                 verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NETBIOS_NODE:
-            printf("Netbios node type : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Netbios node type : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NETBIOS_SCOPE:
-            printf("Netbios scope : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Netbios scope : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_XWIN_FS:
-            printf("X Window font server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("X Window font server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_XWIN_DM:
-            printf("X Window display manager : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("X Window display manager : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NIS_P_DOMAIN:
-            printf("NIS+ domain : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("NIS+ domain : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NIS_P_SERVERS:
-            printf("NIS+ servers : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("NIS+ servers : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_MOBILE_HOME:
-            printf("Mobile IP home agent : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Mobile IP home agent : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_SMPT_SERVER:
-            printf("SMPT server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("SMPT server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_POP3_SERVER:
-            printf("POP3 server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("POP3 server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NNTP_SERVER:
-            printf("NNTP server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("NNTP server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_WWW_SERVER:
-            printf("WWW server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("WWW server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_FINGER_SERVER:
-            printf("Finger server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Finger server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_IRC_SERVER:
-            printf("IRC server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("IRC server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_STREETTALK_SRVR:
-            printf("Streettalk server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Streettalk server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_STREETTALK_STDA:
-            printf("Streettalk directory assistance : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Streettalk directory assistance : "),
+                 verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
 
         // DHCP options
         case TAG_REQUESTED_IP:
-            printf("Requested IP address : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Requested IP address : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_IP_LEASE:
-            printf("Lease time : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Lease time : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += 5;
             break;
         case TAG_OPT_OVERLOAD:
-            printf("Overload : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Overload : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_TFTP_SERVER:
-            printf("TFTP server\n");
+            PRV3(printf("TFTP server\n"), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_BOOTFILENAME:
-            printf("Bootfile : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Bootfile : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_DHCP_MESSAGE:
-            printf("DHCP options : ");
+            PRV3(printf("DHCP options : "), verbose);
             // print the message type of dhcp
             for (j = 1; j <= bp_vend[i + 1]; j++) {
                 switch (bp_vend[i + 1 + j]) {
                 case DHCPDISCOVER:
-                    printf("Discover\n");
+                    PRV3(printf("Discover\n"), verbose);
                     break;
                 case DHCPOFFER:
-                    printf("Offer\n");
+                    PRV3(printf("Offer\n"), verbose);
                     break;
                 case DHCPREQUEST:
-                    printf("Request\n");
+                    PRV3(printf("Request\n"), verbose);
                     break;
                 case DHCPDECLINE:
-                    printf("Decline\n");
+                    PRV3(printf("Decline\n"), verbose);
                     break;
                 case DHCPACK:
-                    printf("Ack\n");
+                    PRV3(printf("Ack\n"), verbose);
                     break;
                 case DHCPNAK:
-                    printf("Nack\n");
+                    PRV3(printf("Nack\n"), verbose);
                     break;
                 case DHCPRELEASE:
-                    printf("Release\n");
+                    PRV3(printf("Release\n"), verbose);
                     break;
                 case DHCPINFORM:
-                    printf("Inform\n");
+                    PRV3(printf("Inform\n"), verbose);
                     break;
                 default:
                     break;
@@ -453,238 +461,249 @@ void bootp_vendor_specific(uint8_t bp_vend[64]) {
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_SERVER_ID:
-            printf("DHCP server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("DHCP server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_PARM_REQUEST:
-            printf("Parameter request list : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Parameter request list"), verbose);
+            // PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_MESSAGE:
-            printf("Message : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Message : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_MAX_MSG_SIZE:
-            printf("Maximum DHCP message size : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Maximum DHCP message size : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_RENEWAL_TIME:
-            printf("Renewal time : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Renewal time : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_REBIND_TIME:
-            printf("Rebinding time : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Rebinding time : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_VENDOR_CLASS:
-            printf("Vendor class identifier : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Vendor class identifier : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_CLIENT_ID:
-            printf("Client identifier : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Client identifier : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
 
         // RFC 2241
         case TAG_NDS_SERVERS:
-            printf("NDS servers : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("NDS servers : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NDS_TREE_NAME:
-            printf("NDS tree name : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("NDS tree name : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NDS_CONTEXT:
-            printf("NDS context : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("NDS context : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
 
         // RFC 2485
         case TAG_OPEN_GROUP_UAP:
-            printf("Open Group's User Authentication Protocol : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf(
+                     "Open Group's User Authentication Protocol : "),
+                 verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
 
         // RFC 2563
         case TAG_DISABLE_AUTOCONF:
-            printf("Disable Autoconfiguration : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Disable Autoconfiguration : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
 
         // RFC 2610
         case TAG_SLP_DA:
-            printf("Service Location Protocol Directory Agent : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf(
+                     "Service Location Protocol Directory Agent : "),
+                 verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_SLP_SCOPE:
-            printf("Service Location Protocol Scope : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Service Location Protocol Scope : "),
+                 verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
 
         // RFC 2937
         case TAG_NS_SEARCH:
-            printf("NetBIOS over TCP/IP Name Server Search Order : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("NetBIOS over TCP/IP Name Server Search "
+                        "Order : "),
+                 verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
 
         // RFC 3011
         case TAG_IP4_SUBNET_SELECT:
-            printf("IP4 subnet select : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("IP4 subnet select : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
 
         // Bootp extensions
         case TAG_USER_CLASS:
-            printf("User class : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("User class : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_SLP_NAMING_AUTH:
-            printf("Service Location Protocol Naming Authority : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf(
+                     "Service Location Protocol Naming Authority : "),
+                 verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_CLIENT_FQDN:
-            printf("Client Fully Qualified Domain Name : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Client Fully Qualified Domain Name : "),
+                 verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_AGENT_CIRCUIT:
-            printf("Agent Circuit ID : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Agent Circuit ID : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_AGENT_MASK:
-            printf("Agent Subnet Mask : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Agent Subnet Mask : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_TZ_STRING:
-            printf("Time Zone String : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Time Zone String : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_FQDN_OPTION:
-            printf("Fully Qualified Domain Name : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Fully Qualified Domain Name : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_AUTH:
-            printf("Authentication\n");
+            PRV3(printf("Authentication\n"), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_VINES_SERVERS:
-            printf("Vines servers : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("Vines servers : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_SERVER_RANK:
-            printf("Server rank : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Server rank : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_CLIENT_ARCH:
-            printf("Client architecture : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Client architecture : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_CLIENT_NDI:
-            printf("Client network device interface : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("Client network device interface : "),
+                 verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_CLIENT_GUID:
-            printf("Client GUID : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Client GUID : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_LDAP_URL:
-            printf("LDAP URL : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("LDAP URL : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_6OVER4:
-            printf("6over4 : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("6over4 : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_PRINTER_NAME:
-            printf("Printer name : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Printer name : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_MDHCP_SERVER:
-            printf("MDHCP server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("MDHCP server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_IPX_COMPAT:
-            printf("IPX compatibility : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("IPX compatibility : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NETINFO_PARENT:
-            printf("NetInfo parent server : ");
-            print_dhcp_option_addr(bp_vend, i);
+            PRV3(printf("NetInfo parent server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_NETINFO_PARENT_TAG:
-            printf("NetInfo parent server tag : ");
-            print_dhcp_option_int(bp_vend, i);
+            PRV3(printf("NetInfo parent server tag : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_URL:
-            printf("URL : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("URL : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_FAILOVER:
-            printf("Failover : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Failover : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_EXTENDED_REQUEST:
-            printf("Extended request : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Extended request : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_EXTENDED_OPTION:
-            printf("Extended option : ");
-            print_dhcp_option_name(bp_vend, i);
+            PRV3(printf("Extended option : "), verbose);
+            PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
 
         // Add
         case TAG_SIP_SERVER:
-            printf("SIP server : ");
+            PRV3(printf("SIP server : "), verbose);
             // There is the type in add to the length
             for (j = 2; j <= bp_vend[i + 1]; j++) {
                 if ((j != 2 && j != bp_vend[i + 1] + 1) && j % 4 != 1)
-                    printf(".");
+                    PRV3(printf("."), verbose);
 
-                printf("%d", bp_vend[i + j + 1]);
+                PRV3(printf("%d", bp_vend[i + j + 1]), verbose);
 
                 if (j % 4 == 0 && j != bp_vend[i + 1])
-                    printf(" ");
+                    PRV3(printf(" "), verbose);
             }
-            printf("\n");
+            PRV3(printf("\n"), verbose);
 
             i += bp_vend[i + 1] + 1;
             break;

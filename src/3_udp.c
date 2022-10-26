@@ -9,7 +9,7 @@ void get_protocol_udp(const u_char *packet,
 
     if (ntohs(udp_header->uh_dport) == BOOTP_PORT ||
         ntohs(udp_header->uh_sport) == BOOTP_PORT)
-        bootp_analyzer(packet);
+        bootp_analyzer(packet, 1);
 }
 
 struct udphdr *udp_analyzer(const u_char *packet,

@@ -9,7 +9,7 @@ void get_protocol_tcp(const u_char *packet,
 
     if (ntohs(tcp_header->th_dport) == BOOTP_PORT ||
         ntohs(tcp_header->th_sport) == BOOTP_PORT)
-        bootp_analyzer(packet);
+        bootp_analyzer(packet, 1);
 }
 
 struct tcphdr *tcp_analyzer(const u_char *packet,

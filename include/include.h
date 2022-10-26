@@ -1,6 +1,23 @@
 #ifndef INCLUDE_H
 #define INCLUDE_H
 
+// Print with verbose level
+#define PRV1(op, v) \
+    do {            \
+        if (v == 1) \
+            op;     \
+    } while (0)
+#define PRV2(op, v) \
+    do {            \
+        if (v == 2) \
+            op;     \
+    } while (0)
+#define PRV3(op, v) \
+    do {            \
+        if (v == 3) \
+            op;     \
+    } while (0)
+
 #include <getopt.h>
 #include <net/ethernet.h>
 #include <netinet/ether.h>
