@@ -10,6 +10,15 @@ void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
     if (ntohs(tcp_header->th_dport) == BOOTP_PORT ||
         ntohs(tcp_header->th_sport) == BOOTP_PORT)
         bootp_analyzer(packet, verbose);
+
+    int i;
+    int smtp[NB_SMTP] = {SMTP_1, SMTP_2, SMTP_3, SMTP_4, SMTP_5};
+    for (i = 0; i < NB_SMTP; i++) {
+
+        if (ntohs(tcp_header->th_dport) == smtp[i] ||
+            ntohs(tcp_header->th_sport) == smtp[i])
+            smtp_analyzer(packet, verbose);
+    }
 }
 
 struct tcphdr *tcp_analyzer(const u_char *packet, int verbose) {
@@ -18,7 +27,8 @@ struct tcphdr *tcp_analyzer(const u_char *packet, int verbose) {
 
     PRV1(printf(GRN "TCP Header" NC "\n"), verbose);
 
-    PRV1(printf("Source port : %d, Destination port : %d\n",
+    PRV1(printf("Source port : %d\n"
+                "Destination port : %d\n",
                 ntohs(tcp_header->th_sport),
                 ntohs(tcp_header->th_dport)),
          verbose);
@@ -26,20 +36,48 @@ struct tcphdr *tcp_analyzer(const u_char *packet, int verbose) {
     PRV2(printf("Data offset : % d, Flags : ", tcp_header->th_off),
          verbose);
 
-    if (tcp_header->th_flags & TH_SYN)
-        PRV2(printf(", SYN"), verbose);
-    if (tcp_header->th_flags & TH_ACK)
-        PRV2(printf(", ACK"), verbose);
-    if (tcp_header->th_flags & TH_FIN)
-        PRV2(printf(", FIN"), verbose);
-    if (tcp_header->th_flags & TH_RST)
-        PRV2(printf(", RST"), verbose);
-    if (tcp_header->th_flags & TH_PUSH)
-        PRV2(printf(", PUSH"), verbose);
-    if (tcp_header->th_flags & TH_URG)
-        PRV2(printf(", URG"), verbose);
+    int nb_flags = 0;
 
-    printf("\n");
+    if (tcp_header->th_flags & TH_SYN) {
+        if (nb_flags != 0)
+            PRV2(printf(", "), verbose);
+        PRV2(printf("SYN"), verbose);
+        nb_flags++;
+    }
+    if (tcp_header->th_flags & TH_ACK) {
+        if (nb_flags != 0)
+            PRV2(printf(", "), verbose);
+        PRV2(printf("ACK"), verbose);
+        nb_flags++;
+    }
+    if (tcp_header->th_flags & TH_FIN) {
+        if (nb_flags != 0)
+            PRV2(printf(", "), verbose);
+        PRV2(printf("FIN"), verbose);
+        nb_flags++;
+    }
+    if (tcp_header->th_flags & TH_RST) {
+        if (nb_flags != 0)
+            PRV2(printf(", "), verbose);
+        PRV2(printf("RST"), verbose);
+        nb_flags++;
+    }
+    if (tcp_header->th_flags & TH_PUSH) {
+        if (nb_flags != 0)
+            PRV2(printf(", "), verbose);
+        PRV2(printf("PUSH"), verbose);
+        nb_flags++;
+    }
+    if (tcp_header->th_flags & TH_URG) {
+        if (nb_flags != 0)
+            PRV2(printf(", "), verbose);
+        PRV2(printf("URG"), verbose);
+        nb_flags++;
+    }
+
+    if (nb_flags == 0)
+        PRV2(printf("none"), verbose);
+    PRV2(printf("\n"), verbose);
 
     return tcp_header;
 }

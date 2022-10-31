@@ -2,6 +2,7 @@
 #define INCLUDE_H
 
 #include "../include/netinet_bootp.h"
+#include <ctype.h>
 #include <getopt.h>
 #include <net/ethernet.h>
 #include <netinet/ether.h>
@@ -15,6 +16,7 @@
 // Application protocol
 #define DATA_FTP 20
 #define FTP 21
+#define NB_SMTP 5
 #define SMTP_1 25
 #define SMTP_2 465
 #define SMTP_3 587

@@ -12,7 +12,7 @@
 void got_packet(u_char *args, const struct pcap_pkthdr *header,
                 const u_char *packet) {
 
-    int verbose = 3;
+    int verbose = 1;
 
     // Ethernet Header
     struct ether_header *eth_header =
@@ -74,6 +74,8 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     }
 
     (void)arp_header;
+
+    printf("\n");
 }
 
 int main(int argc, char **argv) {
