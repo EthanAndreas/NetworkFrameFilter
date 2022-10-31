@@ -7,15 +7,15 @@ void bootp_analyzer(const u_char *packet, int verbose) {
     printf(GRN "Bootp protocol" NC "\n");
 
     if (bootp_header->bp_op == BOOTREQUEST)
-        PRV1(printf("Request\n"), verbose);
+        PRV1(printf("Request"), verbose);
     else if (bootp_header->bp_op == BOOTREPLY)
-        PRV1(printf("Reply\n"), verbose);
+        PRV1(printf("Reply"), verbose);
 
     if (bootp_header->bp_htype == HTYPE_ETHER)
-        PRV1(printf("Ethernet\n"), verbose);
+        PRV1(printf(", Ethernet"), verbose);
 
     // print transaction id in frame form
-    PRV1(printf("Transaction ID : %02x:%02x:%02x:%02x\n",
+    PRV1(printf(", Transaction ID : %02x:%02x:%02x:%02x\n",
                 bootp_header->bp_xid[0], bootp_header->bp_xid[1],
                 bootp_header->bp_xid[2], bootp_header->bp_xid[3]),
          verbose);

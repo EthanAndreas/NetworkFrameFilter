@@ -7,7 +7,6 @@
 
 void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
                       int verbose);
-struct tcphdr *tcp_analyzer(const u_char *packet,
-                            struct ip *ip_header, int verbose);
+struct tcphdr *tcp_analyzer(const u_char *packet, int verbose);
 
 #endif

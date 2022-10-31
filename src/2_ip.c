@@ -1,32 +1,39 @@
 #include "../include/2_ip.h"
 
-struct ip *ip_analyzer(const u_char *packet, int verbose) {
+struct iphdr *ip_analyzer(const u_char *packet, int verbose) {
 
-    struct ip *ip = (struct ip *)packet;
+    struct iphdr *ip = (struct iphdr *)packet;
 
     PRV1(printf(GRN "IP Header" NC "\n"), verbose);
 
-    PRV1(printf("IP version : %d\n", ip->ip_v), verbose);
+    PRV1(printf("IP version : %d", ip->version), verbose);
 
-    if (ip->ip_p == IPPROTO_TCP)
-        PRV1(printf("Protocol : TCP\n"), verbose);
+    if (ip->protocol == IPPROTO_TCP)
+        PRV1(printf(", Protocol : TCP"), verbose);
 
-    if (ip->ip_p == IPPROTO_UDP)
-        PRV1(printf("Protocol : UDP\n"), verbose);
+    if (ip->protocol == IPPROTO_UDP)
+        PRV1(printf(", Protocol : UDP"), verbose);
 
-    PRV1(printf("Address IP source : %s\n", inet_ntoa(ip->ip_src)),
+    PRV1(printf(", IP source : %s",
+                inet_ntoa(*(struct in_addr *)&ip->saddr)),
          verbose);
 
-    PRV1(printf("Address IP destination : %s\n",
-                inet_ntoa(ip->ip_dst)),
+    PRV1(printf(", IP destination : %s\n",
+                inet_ntoa(*(struct in_addr *)&ip->daddr)),
          verbose);
 
-    PRV2(printf("\tIP Size: %d\n"
+    PRV2(printf("\tSize: %d\n"
                 "\tThread size : %d\n",
-                ip->ip_hl, ip->ip_len),
+                ip->ihl, ip->tot_len),
          verbose);
 
-    // type service
+    PRV3(printf("\t\tType of service : %d\n"
+                "\t\tIdentification : %d\n"
+                "\t\tFragment offset : %d\n"
+                "\t\tTime to live : %d\n"
+                "\t\tChecksum : %d\n",
+                ip->tos, ip->id, ip->frag_off, ip->ttl, ip->check),
+         verbose);
 
     return ip;
 }

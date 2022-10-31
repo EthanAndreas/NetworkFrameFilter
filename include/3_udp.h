@@ -7,7 +7,6 @@
 
 void get_protocol_udp(const u_char *packet, struct udphdr *udp_header,
                       int verbose);
-struct udphdr *udp_analyzer(const u_char *packet,
-                            struct ip *ip_header, int verbose);
+struct udphdr *udp_analyzer(const u_char *packet, int verbose);
 
 #endif
