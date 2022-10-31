@@ -12,7 +12,7 @@
 void got_packet(u_char *args, const struct pcap_pkthdr *header,
                 const u_char *packet) {
 
-    int verbose = 1;
+    int verbose = 3;
 
     // Ethernet Header
     struct ether_header *eth_header =

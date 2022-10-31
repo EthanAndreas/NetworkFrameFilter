@@ -26,15 +26,18 @@ struct ether_header *ethernet_analyzer(const u_char *packet,
     printf(GRN "Ethernet Header" NC "\n");
 
     PRV1(printf(
-             "Address MAC source : %s",
+             "Address MAC source : %s\n",
              ether_ntoa_r(
                  (struct ether_addr *)eth_header->ether_shost, buf)),
          verbose);
 
     PRV1(printf(
-             ", Address MAC destination : %s\n",
+             "Address MAC destination : %s\n",
              ether_ntoa_r(
                  (struct ether_addr *)eth_header->ether_dhost, buf)),
+         verbose);
+
+    PRV1(printf("Ether type : %d\n", eth_header->ether_type),
          verbose);
 
     return eth_header;
