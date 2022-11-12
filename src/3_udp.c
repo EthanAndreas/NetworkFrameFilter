@@ -16,6 +16,8 @@ struct udphdr *udp_analyzer(const u_char *packet, int verbose) {
 
     struct udphdr *udp_header = (struct udphdr *)packet;
 
+    // à compléter pour avoir la taille de la fenêtre
+
     PRV1(printf(GRN "UDP Header" NC "\n"), verbose);
 
     PRV1(printf("Source port : %d\n"
