@@ -55,7 +55,6 @@
 #define CYN2 "\e[36m"
 #define WHT "\e[37m"
 // background color
-#define BLU_B "\e[40m"
 #define RED_B "\e[41m"
 #define GRN_B "\e[42m"
 #define ORA_B "\e[43m"

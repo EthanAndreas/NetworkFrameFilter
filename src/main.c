@@ -12,7 +12,7 @@
 void got_packet(u_char *args, const struct pcap_pkthdr *header,
                 const u_char *packet) {
 
-    int verbose = 3;
+    int verbose = (int)args[0] - 48;
 
     // Ethernet Header
     struct ether_header *eth_header =
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
             exit(1);
         }
 
-        pcap_loop(handle, -1, got_packet, NULL);
+        pcap_loop(handle, -1, got_packet, &usage->level);
 
     } else if (usage->file != NULL) {
 
@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
             exit(1);
         }
 
-        pcap_loop(handle, -1, got_packet, NULL);
+        pcap_loop(handle, -1, got_packet, &usage->level);
 
     } else {
 
