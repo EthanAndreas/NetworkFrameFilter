@@ -32,10 +32,9 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     switch (htons(eth_header->ether_type)) {
 
     case ETHERTYPE_IP:
-
         // IP Header
         ip_header = ip_analyzer(packet, verbose);
-        // keep the packet without the ip header
+
         packet += sizeof(struct iphdr);
 
         // Get the transport protocol
@@ -43,8 +42,8 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
 
             // TCP Header
             tcp_header = tcp_analyzer(packet, verbose);
-            // keep the packet without the tcp header
-            packet += tcp_header->th_off;
+
+            packet += tcp_header->th_off * 4;
 
             // Get the application protocol
             get_protocol_tcp(packet, tcp_header, verbose);
@@ -53,7 +52,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
 
             // UDP Header
             udp_header = udp_analyzer(packet, verbose);
-            // keep the packet without the udp header
+
             packet += sizeof(struct udphdr);
 
             // Get the application protocol
@@ -61,13 +60,14 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
         }
 
         break;
-    case ETHERTYPE_ARP:
 
+    case ETHERTYPE_ARP:
         // ARP Header
         arp_header = arp_analyzer(packet, verbose);
-        // keep the packet without the arp header
+
         packet += sizeof(struct ether_arp);
         break;
+
     default:
         // For protocols that are not supported
         printf("Unknown protocol\n");

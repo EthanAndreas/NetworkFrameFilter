@@ -12,6 +12,7 @@
 #include <pcap.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // Application protocol
 #define DATA_FTP 20

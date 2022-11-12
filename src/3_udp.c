@@ -10,6 +10,10 @@ void get_protocol_udp(const u_char *packet, struct udphdr *udp_header,
     if (ntohs(udp_header->uh_dport) == BOOTP_PORT ||
         ntohs(udp_header->uh_sport) == BOOTP_PORT)
         bootp_analyzer(packet, verbose);
+
+    if (ntohs(udp_header->uh_dport) == HTTP_PORT ||
+        ntohs(udp_header->uh_sport) == HTTP_PORT)
+        http_analyzer(packet, verbose);
 }
 
 struct udphdr *udp_analyzer(const u_char *packet, int verbose) {

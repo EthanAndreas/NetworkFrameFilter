@@ -15,10 +15,16 @@ void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
     int smtp[NB_SMTP] = {SMTP_1, SMTP_2, SMTP_3, SMTP_4, SMTP_5};
     for (i = 0; i < NB_SMTP; i++) {
 
-        if (ntohs(tcp_header->th_dport) == smtp[i] ||
-            ntohs(tcp_header->th_sport) == smtp[i])
+        if ((ntohs(tcp_header->th_dport) == smtp[i] ||
+             ntohs(tcp_header->th_sport) == smtp[i]) &&
+            (tcp_header->th_flags & TH_ACK) &&
+            (tcp_header->th_flags & TH_PUSH))
             smtp_analyzer(packet, verbose);
     }
+
+    if (ntohs(tcp_header->th_dport) == HTTP_PORT ||
+        ntohs(tcp_header->th_sport) == HTTP_PORT)
+        http_analyzer(packet, verbose);
 }
 
 struct tcphdr *tcp_analyzer(const u_char *packet, int verbose) {

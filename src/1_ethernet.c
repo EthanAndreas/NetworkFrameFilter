@@ -37,7 +37,7 @@ struct ether_header *ethernet_analyzer(const u_char *packet,
                  (struct ether_addr *)eth_header->ether_dhost, buf)),
          verbose);
 
-    PRV1(printf("Ether type : %d\n", eth_header->ether_type),
+    PRV2(printf("Ether type : %d\n", eth_header->ether_type),
          verbose);
 
     return eth_header;

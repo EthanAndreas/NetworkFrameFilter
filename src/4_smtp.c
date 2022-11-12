@@ -4,11 +4,12 @@ int intToAscii(int number) { return '0' + number; }
 
 void smtp_analyzer(const u_char *packet, int verbose) {
 
-    printf(GRN "SMTP protocol" NC "\n");
+    PRV1(printf(GRN "SMTP protocol" NC "\n"), verbose);
 
-    // int i, size = sizeof(packet);
-    // for (i = 0; i < size; i++) {
-    //     printf("%0x ", packet[i]);
-    // }
-    // printf("\n");
+    int i = 0;
+    while (packet[i] != 0x0d && packet[i] != 0x0a) {
+        PRV3(printf("%c", packet[i]), verbose);
+        i++;
+    }
+    PRV3(printf("\n"), verbose);
 }

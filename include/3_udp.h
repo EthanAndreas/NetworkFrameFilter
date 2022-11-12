@@ -3,6 +3,8 @@
 
 #include "../include/4_bootp.h"
 #include "../include/4_dns.h"
+#include "../include/4_ftp.h"
+#include "../include/4_http.h"
 #include "../include/4_smtp.h"
 #include "../include/include.h"
 

@@ -63,14 +63,16 @@ void bootp_analyzer(const u_char *packet, int verbose) {
                     bootp_header->bp_file),
              verbose);
 
-    bootp_vendor_specific(bootp_header->bp_vend, verbose);
+    // Vendor is a variable length field
+    const u_char *bp_vend = bootp_header->bp_vend;
+    bootp_vendor_specific(bp_vend, verbose);
 }
 
 /**
  * @brief Used for print IP address in the vendor specific print's
  * function
  */
-void print_dhcp_option_addr(uint8_t bp_vend[64], int i) {
+void print_dhcp_option_addr(const u_char *bp_vend, int i) {
 
     int j;
     for (j = 1; j <= bp_vend[i + 1]; j++) {
@@ -89,7 +91,7 @@ void print_dhcp_option_addr(uint8_t bp_vend[64], int i) {
  * @brief Used for print name in the vendor specific print's
  * function
  */
-void print_dhcp_option_name(uint8_t bp_vend[64], int i) {
+void print_dhcp_option_name(const u_char *bp_vend, int i) {
 
     int j;
     for (j = 1; j <= bp_vend[i + 1]; j++) {
@@ -102,7 +104,7 @@ void print_dhcp_option_name(uint8_t bp_vend[64], int i) {
  * @brief Used for print integer in the vendor specific print's
  * function
  */
-void print_dhcp_option_int(uint8_t bp_vend[64], int i) {
+void print_dhcp_option_int(const u_char *bp_vend, int i) {
 
     uint32_t time = 0;
     time += bp_vend[i + 2] << 24;
@@ -118,7 +120,7 @@ void print_dhcp_option_int(uint8_t bp_vend[64], int i) {
  * There is a lot of line, they all print options and their content
  * which can be an IP address, a name or a number.
  */
-void bootp_vendor_specific(uint8_t bp_vend[64], int verbose) {
+void bootp_vendor_specific(const u_char *bp_vend, int verbose) {
 
     /*
     problème sur tftp au niveau du contenu
@@ -129,6 +131,8 @@ void bootp_vendor_specific(uint8_t bp_vend[64], int verbose) {
     objectif : faire une première analyse pour récupérer la taille de
     la trame avec TAG_END et ensuite détecter les options
     */
+
+    // printf("size of bp_vend : %ld\n", strlen(bp_vend));
 
     if (bp_vend[0] == 0x63 && bp_vend[1] == 0x82 &&
         bp_vend[2] == 0x53 && bp_vend[3] == 0x63) {
@@ -746,11 +750,8 @@ void bootp_vendor_specific(uint8_t bp_vend[64], int verbose) {
             PRV3(print_dhcp_option_name(bp_vend, i), verbose);
             i += bp_vend[i + 1] + 1;
             break;
-
-        // Add
         case TAG_SIP_SERVER:
             PRV3(printf("\t\tSIP server : "), verbose);
-            // There is the type in add to the length
             for (j = 2; j <= bp_vend[i + 1]; j++) {
                 if ((j != 2 && j != bp_vend[i + 1] + 1) && j % 4 != 1)
                     PRV3(printf("."), verbose);
@@ -771,7 +772,6 @@ void bootp_vendor_specific(uint8_t bp_vend[64], int verbose) {
         default:
             break;
         }
-
         i++;
     }
 }
