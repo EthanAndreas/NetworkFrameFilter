@@ -1,10 +1,9 @@
 #include "../include/1_ethernet.h"
 #include "../include/2_arp.h"
 #include "../include/2_ip.h"
+#include "../include/2_ipv6.h"
 #include "../include/3_tcp.h"
 #include "../include/3_udp.h"
-#include "../include/4_bootp.h"
-#include "../include/4_dns.h"
 
 #include "../include/include.h"
 #include "../include/option.h"
@@ -22,6 +21,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
 
     // Network Layer
     struct iphdr *ip_header;
+    struct ip6_hdr *ipv6_header;
     struct ether_arp *arp_header;
 
     // Transport Layer
@@ -61,6 +61,25 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
 
         break;
 
+    case ETHERTYPE_IPV6:
+        // IPv6 Header
+        ipv6_header = ipv6_analyzer(packet, verbose);
+
+        packet += sizeof(struct ip6_hdr);
+
+        break;
+
+    case ETHERTYPE_VLAN:
+        // skip vlan header
+        packet += 4;
+
+        // IPv6 Header
+        ipv6_header = ipv6_analyzer(packet, verbose);
+
+        packet += sizeof(struct ip6_hdr);
+
+        break;
+
     case ETHERTYPE_ARP:
         // ARP Header
         arp_header = arp_analyzer(packet, verbose);
@@ -73,6 +92,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
         printf("Unknown protocol\n");
     }
 
+    (void)ipv6_header;
     (void)arp_header;
 
     printf(GRN_B "                                                   "

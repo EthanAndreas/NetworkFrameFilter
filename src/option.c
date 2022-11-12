@@ -5,7 +5,7 @@ void init_usage(usage_t *usage) {
     usage->interface = NULL;
     usage->file = NULL;
     usage->filter = NULL;
-    usage->level = '1';
+    usage->level = '3';
 }
 
 int option(int argc, char **argv, usage_t *usage) {
