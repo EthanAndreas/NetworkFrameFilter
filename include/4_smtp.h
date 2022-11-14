@@ -3,6 +3,6 @@
 
 #include "../include/include.h"
 
-void smtp_analyzer(const u_char *packet, int verbose);
+void smtp_analyzer(const u_char *packet, int length, int verbose);
 
 #endif

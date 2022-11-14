@@ -1,19 +1,19 @@
 #include "../include/3_udp.h"
 
 void get_protocol_udp(const u_char *packet, struct udphdr *udp_header,
-                      int verbose) {
+                      int length, int verbose) {
 
     if (ntohs(udp_header->uh_dport) == DNS_PORT ||
         ntohs(udp_header->uh_sport) == DNS_PORT)
-        dns_analyzer(packet, verbose);
+        dns_analyzer(packet, length, verbose);
 
     if (ntohs(udp_header->uh_dport) == BOOTP_PORT ||
         ntohs(udp_header->uh_sport) == BOOTP_PORT)
-        bootp_analyzer(packet, verbose);
+        bootp_analyzer(packet, length, verbose);
 
     if (ntohs(udp_header->uh_dport) == HTTP_PORT ||
         ntohs(udp_header->uh_sport) == HTTP_PORT)
-        http_analyzer(packet, verbose);
+        http_analyzer(packet, length, verbose);
 }
 
 struct udphdr *udp_analyzer(const u_char *packet, int verbose) {

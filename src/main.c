@@ -50,7 +50,8 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
             udp_header = udp_analyzer(packet, verbose);
             packet += sizeof(struct udphdr);
 
-            get_protocol_udp(packet, udp_header, verbose);
+            get_protocol_udp(packet, udp_header, udp_header->len,
+                             verbose);
         }
 
         break;
@@ -63,13 +64,17 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
             tcp_header = tcp_analyzer(packet, verbose);
             packet += tcp_header->th_off * 4;
 
-            get_protocol_tcp(packet, tcp_header, 0, verbose);
+            get_protocol_tcp(packet, tcp_header,
+                             ntohs(ipv6_header->ip6_plen) -
+                                 tcp_header->th_off * 4,
+                             verbose);
         } else if (ipv6_header->ip6_nxt == IPPROTO_UDP) {
 
             udp_header = udp_analyzer(packet, verbose);
             packet += sizeof(struct udphdr);
 
-            get_protocol_udp(packet, udp_header, verbose);
+            get_protocol_udp(packet, udp_header, udp_header->len,
+                             verbose);
         }
 
         break;

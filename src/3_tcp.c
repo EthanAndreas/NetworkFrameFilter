@@ -5,11 +5,11 @@ void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
 
     if (ntohs(tcp_header->th_dport) == DNS_PORT ||
         ntohs(tcp_header->th_sport) == DNS_PORT)
-        dns_analyzer(packet, verbose);
+        dns_analyzer(packet, length, verbose);
 
     if (ntohs(tcp_header->th_dport) == BOOTP_PORT ||
         ntohs(tcp_header->th_sport) == BOOTP_PORT)
-        bootp_analyzer(packet, verbose);
+        bootp_analyzer(packet, length, verbose);
 
     int i;
     int smtp[NB_SMTP] = {SMTP_1, SMTP_2, SMTP_3, SMTP_4, SMTP_5};
@@ -19,7 +19,7 @@ void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
              ntohs(tcp_header->th_sport) == smtp[i]) &&
             (tcp_header->th_flags & TH_ACK) &&
             (tcp_header->th_flags & TH_PUSH))
-            smtp_analyzer(packet, verbose);
+            smtp_analyzer(packet, length, verbose);
     }
 
     if (ntohs(tcp_header->th_dport) == HTTP_PORT ||

@@ -1,6 +1,6 @@
 #include "../include/4_bootp.h"
 
-void bootp_analyzer(const u_char *packet, int verbose) {
+void bootp_analyzer(const u_char *packet, int length, int verbose) {
 
     struct bootp *bootp_header = (struct bootp *)packet;
 
@@ -65,7 +65,9 @@ void bootp_analyzer(const u_char *packet, int verbose) {
 
     // Vendor is a variable length field
     const u_char *bp_vend = bootp_header->bp_vend;
-    bootp_vendor_specific(bp_vend, verbose);
+
+    bootp_vendor_specific(
+        bp_vend, length - sizeof(struct bootp *) + 64, verbose);
 }
 
 /**
@@ -120,19 +122,13 @@ void print_dhcp_option_int(const u_char *bp_vend, int i) {
  * There is a lot of line, they all print options and their content
  * which can be an IP address, a name or a number.
  */
-void bootp_vendor_specific(const u_char *bp_vend, int verbose) {
+void bootp_vendor_specific(const u_char *bp_vend, int length,
+                           int verbose) {
 
     /*
     problème sur tftp au niveau du contenu
     problème sur agent remote : detecté au mauvais endroit
     */
-
-    /*
-    objectif : faire une première analyse pour récupérer la taille de
-    la trame avec TAG_END et ensuite détecter les options
-    */
-
-    // printf("size of bp_vend : %ld\n", strlen(bp_vend));
 
     if (bp_vend[0] == 0x63 && bp_vend[1] == 0x82 &&
         bp_vend[2] == 0x53 && bp_vend[3] == 0x63) {
@@ -140,7 +136,7 @@ void bootp_vendor_specific(const u_char *bp_vend, int verbose) {
     }
 
     int i = 0, j;
-    while (bp_vend[i] != TAG_END) {
+    while (bp_vend[i] != TAG_END && i < length) {
 
         switch (bp_vend[i]) {
 
