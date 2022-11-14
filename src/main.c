@@ -93,13 +93,12 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
         break;
     default:
         // For protocols that are not supported
-        printf("Unknown protocol\n");
+        printf(RED "Unknown protocol" NC "\n");
     }
 
     (void)arp_header;
 
-    printf(GRN_B "                                                   "
-                 "                      " NC "\n");
+    printf(COLOR_BANNER "\n");
 }
 
 int main(int argc, char **argv) {
@@ -124,6 +123,8 @@ int main(int argc, char **argv) {
             exit(1);
         }
 
+        printf(COLOR_BANNER "\n");
+
         pcap_loop(handle, -1, got_packet, &usage->level);
 
     } else if (usage->file != NULL) {
@@ -133,6 +134,8 @@ int main(int argc, char **argv) {
             fprintf(stderr, "%s\n", errbuf);
             exit(1);
         }
+
+        printf(COLOR_BANNER "\n");
 
         pcap_loop(handle, -1, got_packet, &usage->level);
 

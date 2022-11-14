@@ -65,6 +65,10 @@
 #define CYN2_B "\e[46m"
 #define WHT_B "\e[47m"
 
+#define COLOR_BANNER                                                 \
+    GRN_B "                                                        " \
+          "                 " NC
+
 #endif
 
 // Lien des assets
