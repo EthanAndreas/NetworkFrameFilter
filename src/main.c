@@ -16,7 +16,6 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     // Ethernet Header
     struct ether_header *eth_header =
         ethernet_analyzer(packet, verbose);
-    // keep the packet without the ethernet header
     packet += sizeof(struct ether_header);
 
     // Network Layer
@@ -32,67 +31,66 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     switch (htons(eth_header->ether_type)) {
 
     case ETHERTYPE_IP:
-        // IP Header
         ip_header = ip_analyzer(packet, verbose);
+        packet += ip_header->ihl * 4;
 
-        packet += sizeof(struct iphdr);
-
-        // Get the transport protocol
         if (ip_header->protocol == IPPROTO_TCP) {
 
-            // TCP Header
             tcp_header = tcp_analyzer(packet, verbose);
-
             packet += tcp_header->th_off * 4;
 
-            // Get the application protocol
-            get_protocol_tcp(packet, tcp_header, verbose);
+            get_protocol_tcp(packet, tcp_header,
+                             ntohs(ip_header->tot_len) -
+                                 ip_header->ihl * 4 -
+                                 tcp_header->th_off * 4,
+                             verbose);
 
         } else if (ip_header->protocol == IPPROTO_UDP) {
 
-            // UDP Header
             udp_header = udp_analyzer(packet, verbose);
-
             packet += sizeof(struct udphdr);
 
-            // Get the application protocol
             get_protocol_udp(packet, udp_header, verbose);
         }
 
         break;
-
     case ETHERTYPE_IPV6:
-        // IPv6 Header
         ipv6_header = ipv6_analyzer(packet, verbose);
-
         packet += sizeof(struct ip6_hdr);
 
-        break;
+        if (ipv6_header->ip6_nxt == IPPROTO_TCP) {
 
+            tcp_header = tcp_analyzer(packet, verbose);
+            packet += tcp_header->th_off * 4;
+
+            get_protocol_tcp(packet, tcp_header, 0, verbose);
+        } else if (ipv6_header->ip6_nxt == IPPROTO_UDP) {
+
+            udp_header = udp_analyzer(packet, verbose);
+            packet += sizeof(struct udphdr);
+
+            get_protocol_udp(packet, udp_header, verbose);
+        }
+
+        break;
     case ETHERTYPE_VLAN:
         // skip vlan header
         packet += 4;
 
-        // IPv6 Header
         ipv6_header = ipv6_analyzer(packet, verbose);
-
         packet += sizeof(struct ip6_hdr);
 
         break;
-
     case ETHERTYPE_ARP:
-        // ARP Header
         arp_header = arp_analyzer(packet, verbose);
 
         packet += sizeof(struct ether_arp);
         break;
-
     default:
         // For protocols that are not supported
         printf("Unknown protocol\n");
     }
 
-    (void)ipv6_header;
     (void)arp_header;
 
     printf(GRN_B "                                                   "
