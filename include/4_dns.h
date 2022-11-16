@@ -2,6 +2,7 @@
 #define DNS
 
 #include "../include/include.h"
+#include <string.h>
 
 struct dns_hdr {
     u_int16_t id;
@@ -15,6 +16,7 @@ struct dns_hdr {
 struct query_t {
     char qname[64];
     int length;
+    int position;
     u_int16_t qtype;
     u_int16_t qclass;
 };
@@ -22,6 +24,7 @@ struct query_t {
 struct answer_t {
     char name[64];
     int length;
+    int position;
     u_int16_t type;
     u_int16_t class;
     u_int16_t ttl;
@@ -32,6 +35,7 @@ struct answer_t {
 struct authority_t {
     char name[64];
     int length;
+    int position;
     u_int16_t type;
     u_int16_t class;
     u_int16_t ttl;
@@ -42,9 +46,11 @@ struct authority_t {
 struct dns_name_t {
     char name[64];
     int length;
+    int position;
 };
 
-struct dns_name_t name_reader(const u_char *packet, int length);
+struct dns_name_t name_reader(const u_char *packet, int length,
+                              int i);
 void type_print(u_int16_t type, int verbose);
 void class_print(u_int16_t class, int verbose);
 void rdata_print(u_int16_t type, u_char *rdata, u_int16_t rdlength,

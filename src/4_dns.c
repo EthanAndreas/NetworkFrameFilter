@@ -5,6 +5,9 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
     PRV1(printf(GRN "DNS Protocol" NC "\n"), verbose);
 
     struct dns_hdr *dns_header = (struct dns_hdr *)packet;
+    u_char *copy_packet = malloc(length);
+    memcpy(copy_packet, packet, length);
+
     packet += sizeof(struct dns_hdr);
 
     PRV2(printf("\tTransaction ID : 0x%0x\n", ntohs(dns_header->id)),
@@ -29,30 +32,48 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
          verbose);
 
     int i;
+    struct dns_name_t domain;
 
     struct query_t *queries =
-        malloc(ntohs(dns_header->qdcount) * sizeof(struct query_t));
+        malloc(qdcount * sizeof(struct query_t));
     for (i = 0; i < qdcount; i++) {
 
         PRV3(printf("\t\tQuery %d\n", i + 1), verbose);
         queries[i] = query_parsing(packet, length, verbose);
+        packet += queries[i].length + 4;
+
+        if (queries[i].position != 0) {
+
+            domain =
+                name_reader(copy_packet, length, queries[i].position);
+            PRV3(printf("\t\t\tName : %s\n", domain.name), verbose);
+        } else
+            PRV3(printf("\t\t\tName : %s\n", queries[i].qname),
+                 verbose);
+
+        PRV3(printf("\t\t- Type : "), verbose);
+        type_print(queries[i].qtype, verbose);
+
+        PRV3(printf("\t\t- Class : "), verbose);
+        class_print(queries[i].qclass, verbose);
     }
 
     struct answer_t *answers =
-        malloc(ntohs(dns_header->ancount) * sizeof(struct answer_t));
+        malloc(ancount * sizeof(struct answer_t));
     for (i = 0; i < ancount; i++) {
 
         PRV3(printf("\t\tAnswer %d\n", i + 1), verbose);
         answers[i] = answer_parsing(packet, length, verbose);
     }
 
-    struct authority_t *authorities = malloc(
-        ntohs(dns_header->nscount) * sizeof(struct authority_t));
-    for (i = 0; i < nscount; i++) {
+    // struct authority_t *authorities = malloc(
+    //     ntohs(dns_header->nscount) * sizeof(struct authority_t));
+    // for (i = 0; i < nscount; i++) {
 
-        PRV3(printf("\t\tAuthority %d\n", i + 1), verbose);
-        authorities[i] = authority_parsing(packet, length, verbose);
-    }
+    //     PRV3(printf("\t\tAuthority %d\n", i + 1), verbose);
+    //     authorities[i] = authority_parsing(packet, length,
+    //     verbose);
+    // }
 }
 
 struct query_t query_parsing(const u_char *packet, int length,
@@ -60,7 +81,7 @@ struct query_t query_parsing(const u_char *packet, int length,
 
     struct query_t query;
 
-    struct dns_name_t domain = name_reader(packet, length);
+    struct dns_name_t domain = name_reader(packet, length, 0);
     strcpy(query.qname, domain.name);
     query.length = domain.length;
     packet += query.length;
@@ -71,14 +92,6 @@ struct query_t query_parsing(const u_char *packet, int length,
     query.qclass = ntohs(*(u_int16_t *)packet);
     packet += sizeof(u_int16_t);
 
-    PRV3(printf("\t\t- Name : %s\n", query.qname), verbose);
-
-    PRV3(printf("\t\t- Type : "), verbose);
-    type_print(query.qtype, verbose);
-
-    PRV3(printf("\t\t- Class : "), verbose);
-    class_print(query.qclass, verbose);
-
     return query;
 }
 
@@ -87,7 +100,7 @@ struct answer_t answer_parsing(const u_char *packet, int length,
 
     struct answer_t answer;
 
-    struct dns_name_t domain = name_reader(packet, length);
+    struct dns_name_t domain = name_reader(packet, length, 0);
     strcpy(answer.name, domain.name);
     answer.length = domain.length;
     packet += answer.length;
@@ -107,8 +120,6 @@ struct answer_t answer_parsing(const u_char *packet, int length,
     answer.rdata = malloc(answer.rdlength);
     memcpy(answer.rdata, packet, answer.rdlength);
     packet += answer.rdlength;
-
-    PRV3(printf("\t\t- Name : %s\n", answer.name), verbose);
 
     PRV3(printf("\t\t- Type : "), verbose);
     type_print(answer.type, verbose);
@@ -131,7 +142,7 @@ struct authority_t authority_parsing(const u_char *packet, int length,
 
     struct authority_t authority;
 
-    struct dns_name_t domain = name_reader(packet, length);
+    struct dns_name_t domain = name_reader(packet, length, 0);
     strcpy(authority.name, domain.name);
     authority.length = domain.length;
     packet += authority.length;
@@ -152,8 +163,6 @@ struct authority_t authority_parsing(const u_char *packet, int length,
     memcpy(authority.rdata, packet, authority.rdlength);
     packet += authority.rdlength;
 
-    PRV3(printf("\t\t- Name : %s\n", authority.name), verbose);
-
     PRV3(printf("\t\t- Type : "), verbose);
     type_print(authority.type, verbose);
 
@@ -172,11 +181,19 @@ struct authority_t authority_parsing(const u_char *packet, int length,
     return authority;
 }
 
-struct dns_name_t name_reader(const u_char *packet, int length) {
+struct dns_name_t name_reader(const u_char *packet, int length,
+                              int i) {
 
     struct dns_name_t domain;
 
-    int i = 0;
+    if (packet[i] == 0xc0) {
+        domain.length = 2;
+        domain.position = packet[1];
+        return domain;
+    }
+
+    domain.length = 0;
+    domain.position = 0;
     int block_length = packet[i];
 
     while (packet[i] != 0x00 && i < length) {
@@ -186,11 +203,13 @@ struct dns_name_t name_reader(const u_char *packet, int length) {
             block_length = packet[i];
         } else
             domain.name[i] = packet[i];
+
         i++;
+        domain.length++;
     }
 
     domain.name[i] = '\0';
-    domain.length = i + 1;
+    domain.length++;
 
     return domain;
 }
