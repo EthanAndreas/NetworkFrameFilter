@@ -46,7 +46,7 @@ int query_parsing(const u_char *packet, int offset, int length,
                   int verbose) {
 
     PRV3(printf("\t\t- Name : "), verbose);
-    offset = name_reader(packet, length, offset, verbose);
+    offset = name_reader(packet, offset, length, verbose);
 
     uint16_t type = ntohs(*(uint16_t *)(packet + offset));
     type_print(type, verbose);
@@ -61,7 +61,7 @@ int answer_parsing(const u_char *packet, int offset, int length,
                    int verbose) {
 
     PRV3(printf("\t\t- Name : "), verbose);
-    offset = name_reader(packet, length, offset, verbose);
+    offset = name_reader(packet, offset, length, verbose);
 
     uint16_t type = ntohs(*(uint16_t *)(packet + offset));
     type_print(type, verbose);
@@ -75,9 +75,9 @@ int answer_parsing(const u_char *packet, int offset, int length,
     uint16_t rdlength = ntohs(*(uint16_t *)(packet + offset + 8));
     PRV3(printf("\t\t- RD Length : %d\n", rdlength), verbose);
 
-    // PRV3(printf("\t\t- RDATA : "), verbose);
-    // rdata_print(type, (u_char *)(packet + offset + 10), rdlength,
-    // verbose);
+    PRV3(printf("\t\t- RData :\n"), verbose);
+    data_reader(packet, offset + 10, offset + 10 + rdlength, length,
+                verbose);
 
     return offset + 10 + rdlength;
 }
@@ -88,14 +88,14 @@ int authority_parsing(const u_char *packet, int offset, int length,
     return offset;
 }
 
-int name_reader(const u_char *packet, int length, int i,
+int name_reader(const u_char *packet, int i, int length,
                 int verbose) {
 
     int j;
     while (packet[i] != 0 && i < length) {
 
-        if (packet[i] >= 0xc0) {
-            name_reader(packet, length, packet[i + 1], verbose);
+        if (packet[i] == 0xc0) {
+            name_reader(packet, packet[i + 1], length, verbose);
             return i + 2;
         }
 
@@ -108,6 +108,35 @@ int name_reader(const u_char *packet, int length, int i,
     }
 
     PRV3(printf("\n"), verbose);
+    return i + 1;
+}
+
+int data_reader(const u_char *packet, int i, uint16_t rdlength,
+                int length, int verbose) {
+
+    int j, position;
+    while (i < rdlength - 20) {
+
+        if (packet[i] == 0xc0) {
+
+            position = packet[i + 1];
+            for (j = 0; j < packet[position]; j++)
+                PRV3(printf("%c", packet[position + j + 1]), verbose);
+            i += 2;
+        } else {
+
+            for (j = 0; j < packet[i]; j++)
+                PRV3(printf("%c", packet[i + j + 1]), verbose);
+            i += packet[i] + 1;
+        }
+    }
+
+    printf(NC "\n");
+
+    uint16_t serial_number = ntohs(*(uint32_t *)(packet + i));
+    PRV3(printf("\t\t- Serial Number : %d\n", serial_number),
+         verbose);
+
     return i + 1;
 }
 
@@ -165,39 +194,6 @@ void class_print(u_int16_t class, int verbose) {
         break;
     case 4:
         PRV3(printf("HS (Hesiod)\n"), verbose);
-        break;
-    default:
-        PRV3(printf("Unknown\n"), verbose);
-        break;
-    }
-}
-
-void rdata_print(u_int16_t type, u_char *rdata, u_int16_t rdlength,
-                 int verbose) {
-
-    switch (type) {
-    case 1:
-        PRV3(printf("%d.%d.%d.%d\n", rdata[0], rdata[1], rdata[2],
-                    rdata[3]),
-             verbose);
-        break;
-    case 2:
-        PRV3(printf("%s\n", rdata), verbose);
-        break;
-    case 5:
-        PRV3(printf("%s\n", rdata), verbose);
-        break;
-    case 6:
-        PRV3(printf("%s\n", rdata), verbose);
-        break;
-    case 12:
-        PRV3(printf("%s\n", rdata), verbose);
-        break;
-    case 15:
-        PRV3(printf("%s\n", rdata), verbose);
-        break;
-    case 16:
-        PRV3(printf("%s\n", rdata), verbose);
         break;
     default:
         PRV3(printf("Unknown\n"), verbose);

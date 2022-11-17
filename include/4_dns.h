@@ -13,17 +13,12 @@ struct dns_hdr {
     u_int16_t arcount;
 };
 
-// struct dns_name_t {
-//     char name[64];
-//     int length;
-//     int position;
-// };
+int name_reader(const u_char *packet, int i, int length, int verbose);
+int data_reader(const u_char *packet, int offset, uint16_t rdlength,
+                int length, int verbose);
 
-int name_reader(const u_char *packet, int length, int i, int verbose);
 void type_print(u_int16_t type, int verbose);
 void class_print(u_int16_t class, int verbose);
-void rdata_print(u_int16_t type, u_char *rdata, u_int16_t rdlength,
-                 int verbose);
 
 int query_parsing(const u_char *packet, int offset, int length,
                   int verbose);
