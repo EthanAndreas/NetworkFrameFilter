@@ -40,6 +40,12 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
         PRV3(printf("\t\tAnswer %d\n", i + 1), verbose);
         offset = answer_parsing(packet, offset, length, verbose);
     }
+
+    for (i = 0; i < nscount; i++) {
+
+        PRV3(printf("\t\tAuthority %d\n", i + 1), verbose);
+        offset = authority_parsing(packet, offset, length, verbose);
+    }
 }
 
 int query_parsing(const u_char *packet, int offset, int length,
@@ -85,7 +91,26 @@ int answer_parsing(const u_char *packet, int offset, int length,
 int authority_parsing(const u_char *packet, int offset, int length,
                       int verbose) {
 
-    return offset;
+    PRV3(printf("\t\t- Name : "), verbose);
+    offset = name_reader(packet, offset, length, verbose);
+
+    uint16_t type = ntohs(*(uint16_t *)(packet + offset));
+    type_print(type, verbose);
+
+    uint16_t class = ntohs(*(uint16_t *)(packet + offset + 2));
+    class_print(class, verbose);
+
+    uint32_t ttl = ntohl(*(uint32_t *)(packet + offset + 4));
+    PRV3(printf("\t\t- TTL : %d\n", ttl), verbose);
+
+    uint16_t rdlength = ntohs(*(uint16_t *)(packet + offset + 8));
+    PRV3(printf("\t\t- RD Length : %d\n", rdlength), verbose);
+
+    PRV3(printf("\t\t- RData :\n"), verbose);
+    data_reader(packet, offset + 10, offset + 10 + rdlength, length,
+                verbose);
+
+    return offset + 10 + rdlength;
 }
 
 int name_reader(const u_char *packet, int i, int length,
@@ -111,33 +136,46 @@ int name_reader(const u_char *packet, int i, int length,
     return i + 1;
 }
 
-int data_reader(const u_char *packet, int i, uint16_t rdlength,
-                int length, int verbose) {
+void data_reader(const u_char *packet, int i, uint16_t rdlength,
+                 int length, int verbose) {
 
     int j, position;
     while (i < rdlength - 20) {
 
         if (packet[i] == 0xc0) {
 
+            PRV3(printf("\t\t\t"), verbose);
             position = packet[i + 1];
             for (j = 0; j < packet[position]; j++)
                 PRV3(printf("%c", packet[position + j + 1]), verbose);
+            // recursive call but dots appears
+            // name_reader(packet, position, length, verbose);
             i += 2;
         } else {
 
+            PRV3(printf("\t\t\t"), verbose);
             for (j = 0; j < packet[i]; j++)
                 PRV3(printf("%c", packet[i + j + 1]), verbose);
-            i += packet[i] + 1;
+            i += packet[i] + 2;
         }
+
+        PRV3(printf("\n"), verbose);
     }
 
-    printf(NC "\n");
+    uint32_t serial_nb = ntohl(*(uint32_t *)(packet + i));
+    PRV3(printf("\t\t\tSerial Number : %d\n", serial_nb), verbose);
 
-    uint16_t serial_number = ntohs(*(uint32_t *)(packet + i));
-    PRV3(printf("\t\t- Serial Number : %d\n", serial_number),
-         verbose);
+    uint32_t refresh = ntohl(*(uint32_t *)(packet + i + 4));
+    PRV3(printf("\t\t\tRefresh : %d\n", refresh), verbose);
 
-    return i + 1;
+    uint32_t retry = ntohl(*(uint32_t *)(packet + i + 8));
+    PRV3(printf("\t\t\tRetry : %d\n", retry), verbose);
+
+    uint32_t expire = ntohl(*(uint32_t *)(packet + i + 12));
+    PRV3(printf("\t\t\tExpire : %d\n", expire), verbose);
+
+    uint32_t minimum = ntohl(*(uint32_t *)(packet + i + 16));
+    PRV3(printf("\t\t\tMinimum : %d\n", minimum), verbose);
 }
 
 void type_print(u_int16_t type, int verbose) {

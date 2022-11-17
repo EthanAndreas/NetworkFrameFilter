@@ -14,8 +14,8 @@ struct dns_hdr {
 };
 
 int name_reader(const u_char *packet, int i, int length, int verbose);
-int data_reader(const u_char *packet, int offset, uint16_t rdlength,
-                int length, int verbose);
+void data_reader(const u_char *packet, int offset, uint16_t rdlength,
+                 int length, int verbose);
 
 void type_print(u_int16_t type, int verbose);
 void class_print(u_int16_t class, int verbose);
