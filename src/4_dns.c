@@ -21,9 +21,9 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
         ancount = ntohs(dns_header->ancount),
         nscount = ntohs(dns_header->nscount);
 
-    PRV3(printf("\t\tQuestions : %d\n"
-                "\t\tAnswer RRs : %d\n"
-                "\t\tAuthority RRs : %d\n",
+    PRV3(printf("\tQuestions : %d\n"
+                "\tAnswer RRs : %d\n"
+                "\tAuthority RRs : %d\n",
                 qdcount, ancount, nscount),
          verbose);
 
@@ -31,19 +31,19 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
 
     for (i = 0; i < qdcount; i++) {
 
-        PRV3(printf("\t\tQuery %d\n", i + 1), verbose);
+        PRV3(printf(CYN1 "\t\tQuery %d" NC "\n", i + 1), verbose);
         offset = query_parsing(packet, offset, length, verbose);
     }
 
     for (i = 0; i < ancount; i++) {
 
-        PRV3(printf("\t\tAnswer %d\n", i + 1), verbose);
+        PRV3(printf(CYN1 "\t\tAnswer %d" NC "\n", i + 1), verbose);
         offset = answer_parsing(packet, offset, length, verbose);
     }
 
     for (i = 0; i < nscount; i++) {
 
-        PRV3(printf("\t\tAuthority %d\n", i + 1), verbose);
+        PRV3(printf(CYN1 "\t\tAuthority %d" NC "\n", i + 1), verbose);
         offset = authority_parsing(packet, offset, length, verbose);
     }
 }
@@ -81,9 +81,8 @@ int answer_parsing(const u_char *packet, int offset, int length,
     uint16_t rdlength = ntohs(*(uint16_t *)(packet + offset + 8));
     PRV3(printf("\t\t- RD Length : %d\n", rdlength), verbose);
 
-    PRV3(printf("\t\t- RData :\n"), verbose);
-    data_reader(packet, offset + 10, offset + 10 + rdlength, length,
-                verbose);
+    data_reader(type, packet, offset + 10, offset + 10 + rdlength,
+                length, verbose);
 
     return offset + 10 + rdlength;
 }
@@ -106,9 +105,8 @@ int authority_parsing(const u_char *packet, int offset, int length,
     uint16_t rdlength = ntohs(*(uint16_t *)(packet + offset + 8));
     PRV3(printf("\t\t- RD Length : %d\n", rdlength), verbose);
 
-    PRV3(printf("\t\t- RData :\n"), verbose);
-    data_reader(packet, offset + 10, offset + 10 + rdlength, length,
-                verbose);
+    data_reader(type, packet, offset + 10, offset + 10 + rdlength,
+                length, verbose);
 
     return offset + 10 + rdlength;
 }
@@ -136,46 +134,124 @@ int name_reader(const u_char *packet, int i, int length,
     return i + 1;
 }
 
-void data_reader(const u_char *packet, int i, uint16_t rdlength,
-                 int length, int verbose) {
+void data_reader(uint16_t type, const u_char *packet, int i,
+                 uint16_t rdlength, int length, int verbose) {
 
-    int j, position;
-    while (i < rdlength - 20) {
+    int j, position, count;
 
-        if (packet[i] == 0xc0) {
+    switch (type) {
 
-            PRV3(printf("\t\t\t"), verbose);
-            position = packet[i + 1];
-            for (j = 0; j < packet[position]; j++)
-                PRV3(printf("%c", packet[position + j + 1]), verbose);
-            // recursive call but dots appears
-            // name_reader(packet, position, length, verbose);
-            i += 2;
-        } else {
+    case 1:
+        PRV3(printf("\t\t- IPv4 Address : "), verbose);
+        for (j = 0; j < 4; j++) {
+            PRV3(printf("%d", packet[i + j]), verbose);
+            if (j != 3) {
+                PRV3(printf("."), verbose);
+            }
+        }
+        PRV3(printf("\n"), verbose);
+        break;
 
-            PRV3(printf("\t\t\t"), verbose);
-            for (j = 0; j < packet[i]; j++)
-                PRV3(printf("%c", packet[i + j + 1]), verbose);
-            i += packet[i] + 2;
+    case 2:
+        PRV3(printf("\t\t- Name Server : "), verbose);
+        name_reader(packet, i, length, verbose);
+        break;
+
+    case 5:
+        PRV3(printf("\t\t- Canonical Name : "), verbose);
+        name_reader(packet, i, length, verbose);
+        break;
+
+    case 6:
+        count = 0;
+        while (i < rdlength - 20) {
+
+            if (packet[i] == 0xc0) {
+
+                PRV3(printf("\t\t- "), verbose);
+                if (count == 0) {
+                    PRV3(printf("Primary Name Server : "), verbose);
+                } else if (count == 1) {
+                    PRV3(printf("Responsible Authority's Mailbox : "),
+                         verbose);
+                }
+
+                position = packet[i + 1];
+                for (j = 0; j < packet[position]; j++)
+                    PRV3(printf("%c", packet[position + j + 1]),
+                         verbose);
+                // recursive call but dots appears
+                // name_reader(packet, position, length, verbose);
+                i += 2;
+                count++;
+            } else {
+
+                PRV3(printf("\t\t- "), verbose);
+                if (count == 0) {
+                    PRV3(printf("Primary Name Server : "), verbose);
+                } else if (count == 1) {
+                    PRV3(printf("Responsible Authority's Mailbox : "),
+                         verbose);
+                }
+
+                for (j = 0; j < packet[i]; j++)
+                    PRV3(printf("%c", packet[i + j + 1]), verbose);
+                i += packet[i] + 2;
+                count++;
+            }
+
+            PRV3(printf("\n"), verbose);
         }
 
+        uint32_t serial_nb = ntohl(*(uint32_t *)(packet + i));
+        PRV3(printf("\t\t- Serial Number : %d\n", serial_nb),
+             verbose);
+
+        uint32_t refresh = ntohl(*(uint32_t *)(packet + i + 4));
+        PRV3(printf("\t\t- Refresh : %d\n", refresh), verbose);
+
+        uint32_t retry = ntohl(*(uint32_t *)(packet + i + 8));
+        PRV3(printf("\t\t- Retry : %d\n", retry), verbose);
+
+        uint32_t expire = ntohl(*(uint32_t *)(packet + i + 12));
+        PRV3(printf("\t\t- Expire : %d\n", expire), verbose);
+
+        uint32_t minimum = ntohl(*(uint32_t *)(packet + i + 16));
+        PRV3(printf("\t\t- Minimum : %d\n", minimum), verbose);
+        break;
+
+    case 12:
+        PRV3(printf("\t\t- Pointer : "), verbose);
+        name_reader(packet, i, length, verbose);
+        break;
+
+    case 15:
+        PRV3(printf("\t\t- Mail Exchange : "), verbose);
+        name_reader(packet, i + 2, length, verbose);
+        break;
+
+    case 16:
+        PRV3(printf("\t\t- Text : "), verbose);
+        for (j = 0; j < packet[i]; j++) {
+            PRV3(printf("%c", packet[i + j + 1]), verbose);
+        }
         PRV3(printf("\n"), verbose);
+        break;
+
+    case 28:
+        PRV3(printf("\t\t- IPv6 Address : "), verbose);
+        for (j = 0; j < 16; j++) {
+            PRV3(printf("%x", packet[i + j]), verbose);
+            if (j != 15) {
+                PRV3(printf(":"), verbose);
+            }
+        }
+        PRV3(printf("\n"), verbose);
+        break;
+
+    default:
+        break;
     }
-
-    uint32_t serial_nb = ntohl(*(uint32_t *)(packet + i));
-    PRV3(printf("\t\t\tSerial Number : %d\n", serial_nb), verbose);
-
-    uint32_t refresh = ntohl(*(uint32_t *)(packet + i + 4));
-    PRV3(printf("\t\t\tRefresh : %d\n", refresh), verbose);
-
-    uint32_t retry = ntohl(*(uint32_t *)(packet + i + 8));
-    PRV3(printf("\t\t\tRetry : %d\n", retry), verbose);
-
-    uint32_t expire = ntohl(*(uint32_t *)(packet + i + 12));
-    PRV3(printf("\t\t\tExpire : %d\n", expire), verbose);
-
-    uint32_t minimum = ntohl(*(uint32_t *)(packet + i + 16));
-    PRV3(printf("\t\t\tMinimum : %d\n", minimum), verbose);
 }
 
 void type_print(u_int16_t type, int verbose) {
