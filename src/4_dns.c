@@ -5,10 +5,6 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
     PRV1(printf(GRN "DNS Protocol" NC "\n"), verbose);
 
     struct dns_hdr *dns_header = (struct dns_hdr *)packet;
-    u_char *copy_packet = malloc(length);
-    memcpy(copy_packet, packet, length);
-
-    packet += sizeof(struct dns_hdr);
 
     PRV2(printf("\tTransaction ID : 0x%0x\n", ntohs(dns_header->id)),
          verbose);
@@ -31,194 +27,93 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
                 qdcount, ancount, nscount),
          verbose);
 
-    int i;
+    int i, offset = sizeof(struct dns_hdr);
 
-    struct query_t *queries =
-        malloc(qdcount * sizeof(struct query_t));
     for (i = 0; i < qdcount; i++) {
 
         PRV3(printf("\t\tQuery %d\n", i + 1), verbose);
-        queries[i] =
-            query_parsing(packet, copy_packet, length, verbose);
-        packet += queries[i].length + 4;
+        offset = query_parsing(packet, offset, length, verbose);
     }
 
-    struct answer_t *answers =
-        malloc(ancount * sizeof(struct answer_t));
     for (i = 0; i < ancount; i++) {
 
         PRV3(printf("\t\tAnswer %d\n", i + 1), verbose);
-        answers[i] =
-            answer_parsing(packet, copy_packet, length, verbose);
-        packet += answers[i].length + 10;
+        offset = answer_parsing(packet, offset, length, verbose);
     }
-
-    // struct authority_t *authorities = malloc(
-    //     ntohs(dns_header->nscount) * sizeof(struct authority_t));
-    // for (i = 0; i < nscount; i++) {
-
-    //     PRV3(printf("\t\tAuthority %d\n", i + 1), verbose);
-    //     authorities[i] = authority_parsing(packet,
-    //     copy_packet,length, verbose);
-    // }
 }
 
-struct query_t query_parsing(const u_char *packet,
-                             u_char *copy_packet, int length,
-                             int verbose) {
+int query_parsing(const u_char *packet, int offset, int length,
+                  int verbose) {
 
-    struct query_t query;
+    PRV3(printf("\t\t- Name : "), verbose);
+    offset = name_reader(packet, length, offset, verbose);
 
-    struct dns_name_t domain =
-        name_reader(packet, copy_packet, length, 0);
-    packet += domain.length;
+    uint16_t type = ntohs(*(uint16_t *)(packet + offset));
+    type_print(type, verbose);
 
-    query.qtype = ntohs(*(u_int16_t *)packet);
-    packet += sizeof(u_int16_t);
+    uint16_t class = ntohs(*(uint16_t *)(packet + offset + 2));
+    class_print(class, verbose);
 
-    query.qclass = ntohs(*(u_int16_t *)packet);
-    packet += sizeof(u_int16_t);
-
-    PRV3(printf("\t\t- Name : %s\n", domain.name), verbose);
-
-    PRV3(printf("\t\t- Type : "), verbose);
-    type_print(query.qtype, verbose);
-
-    PRV3(printf("\t\t- Class : "), verbose);
-    class_print(query.qclass, verbose);
-
-    return query;
+    return offset + 4;
 }
 
-struct answer_t answer_parsing(const u_char *packet,
-                               u_char *copy_packet, int length,
-                               int verbose) {
+int answer_parsing(const u_char *packet, int offset, int length,
+                   int verbose) {
 
-    struct answer_t answer;
+    PRV3(printf("\t\t- Name : "), verbose);
+    offset = name_reader(packet, length, offset, verbose);
 
-    struct dns_name_t domain =
-        name_reader(packet, copy_packet, length, 0);
-    packet += domain.length;
+    uint16_t type = ntohs(*(uint16_t *)(packet + offset));
+    type_print(type, verbose);
 
-    answer.type = ntohs(*(u_int16_t *)packet);
-    packet += sizeof(u_int16_t);
+    uint16_t class = ntohs(*(uint16_t *)(packet + offset + 2));
+    class_print(class, verbose);
 
-    answer.class = ntohs(*(u_int16_t *)packet);
-    packet += sizeof(u_int16_t);
+    uint32_t ttl = ntohl(*(uint32_t *)(packet + offset + 4));
+    PRV3(printf("\t\t- TTL : %d\n", ttl), verbose);
 
-    answer.ttl = ntohl(*(u_int32_t *)packet);
-    packet += sizeof(u_int32_t);
+    uint16_t rdlength = ntohs(*(uint16_t *)(packet + offset + 8));
+    PRV3(printf("\t\t- RD Length : %d\n", rdlength), verbose);
 
-    answer.rdlength = ntohs(*(u_int16_t *)packet);
-    packet += sizeof(u_int16_t);
-
-    // answer.rdata = malloc(answer.rdlength);
-    // memcpy(answer.rdata, packet, answer.rdlength);
-    // packet += answer.rdlength;
-
-    PRV3(printf("\t\t- Name : %s\n", domain.name), verbose);
-
-    PRV3(printf("\t\t- Type : "), verbose);
-    type_print(answer.type, verbose);
-
-    PRV3(printf("\t\t- Class : "), verbose);
-    class_print(answer.class, verbose);
-
-    PRV3(printf("\t\t- TTL : %d\n", answer.ttl), verbose);
-
-    PRV3(printf("\t\t- RD Length : %d\n", answer.rdlength), verbose);
-
-    // PRV3(printf("\t\t- RData : "), verbose);
-    // rdata_print(answer.type, answer.rdata, answer.rdlength,
+    // PRV3(printf("\t\t- RDATA : "), verbose);
+    // rdata_print(type, (u_char *)(packet + offset + 10), rdlength,
     // verbose);
 
-    return answer;
+    return offset + 10 + rdlength;
 }
 
-struct authority_t authority_parsing(const u_char *packet,
-                                     u_char *copy_packet, int length,
-                                     int verbose) {
+int authority_parsing(const u_char *packet, int offset, int length,
+                      int verbose) {
 
-    struct authority_t authority;
-
-    struct dns_name_t domain =
-        name_reader(packet, copy_packet, length, 0);
-    strcpy(authority.name, domain.name);
-    authority.length = domain.length;
-    packet += authority.length;
-
-    authority.type = ntohs(*(u_int16_t *)packet);
-    packet += sizeof(u_int16_t);
-
-    authority.class = ntohs(*(u_int16_t *)packet);
-    packet += sizeof(u_int16_t);
-
-    authority.ttl = ntohl(*(u_int32_t *)packet);
-    packet += sizeof(u_int32_t);
-
-    authority.rdlength = ntohs(*(u_int16_t *)packet);
-    packet += sizeof(u_int16_t);
-
-    // authority.rdata = malloc(authority.rdlength);
-    // memcpy(authority.rdata, packet, authority.rdlength);
-    // packet += authority.rdlength;
-
-    PRV3(printf("\t\t- Type : "), verbose);
-    type_print(authority.type, verbose);
-
-    PRV3(printf("\t\t- Class : "), verbose);
-    class_print(authority.class, verbose);
-
-    PRV3(printf("\t\t- TTL : %d\n", authority.ttl), verbose);
-
-    PRV3(printf("\t\t- RD Length : %d\n", authority.rdlength),
-         verbose);
-
-    // PRV3(printf("\t\t- RData : "), verbose);
-    // rdata_print(authority.type, authority.rdata,
-    // authority.rdlength,
-    //             verbose);
-
-    return authority;
+    return offset;
 }
 
-struct dns_name_t name_reader(const u_char *packet,
-                              u_char *copy_packet, int length,
-                              int i) {
+int name_reader(const u_char *packet, int length, int i,
+                int verbose) {
 
-    struct dns_name_t domain, domain_pointer;
-    int block = packet[i];
-    domain.length = 0;
+    int j;
+    while (packet[i] != 0 && i < length) {
 
-    while (packet[i] != 0x00) {
-
-        printf("%0x ", packet[i]);
-
-        if (packet[i] == 0xc0) {
-
-            domain_pointer = name_reader(copy_packet, copy_packet,
-                                         length, packet[i + 1]);
-            strcat(domain.name, domain_pointer.name);
-            domain.length += domain_pointer.length;
-            i += 2;
+        if (packet[i] >= 0xc0) {
+            name_reader(packet, length, packet[i + 1], verbose);
+            return i + 2;
         }
 
-        domain.length += block;
-        strncat(domain.name, (char *)&packet[i + 1], block);
-        strcat(domain.name, ".");
-        i += block + 1;
-        block = packet[i];
+        for (j = 0; j < packet[i]; j++) {
+            PRV3(printf("%c", packet[i + j + 1]), verbose);
+        }
+
+        PRV3(printf("."), verbose);
+        i += packet[i] + 1;
     }
 
-    domain.name[i] = '\0';
-
-    printf(RED "\nname : %s\n" NC, domain.name);
-    printf(RED "length : %d\n" NC, domain.length);
-
-    return domain;
+    PRV3(printf("\n"), verbose);
+    return i + 1;
 }
 
 void type_print(u_int16_t type, int verbose) {
+
+    PRV3(printf("\t\t- Type : "), verbose);
 
     switch (type) {
     case 1:
@@ -255,6 +150,8 @@ void type_print(u_int16_t type, int verbose) {
 }
 
 void class_print(u_int16_t class, int verbose) {
+
+    PRV3(printf("\t\t- Class : "), verbose);
 
     switch (class) {
     case 1:
