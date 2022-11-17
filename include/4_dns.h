@@ -49,18 +49,21 @@ struct dns_name_t {
     int position;
 };
 
-struct dns_name_t name_reader(const u_char *packet, int length,
-                              int i);
+struct dns_name_t name_reader(const u_char *packet,
+                              u_char *copy_packet, int length, int i);
 void type_print(u_int16_t type, int verbose);
 void class_print(u_int16_t class, int verbose);
 void rdata_print(u_int16_t type, u_char *rdata, u_int16_t rdlength,
                  int verbose);
 
-struct query_t query_parsing(const u_char *packet, int length,
+struct query_t query_parsing(const u_char *packet,
+                             u_char *copy_packet, int length,
                              int verbose);
-struct answer_t answer_parsing(const u_char *packet, int length,
+struct answer_t answer_parsing(const u_char *packet,
+                               u_char *copy_packet, int length,
                                int verbose);
-struct authority_t authority_parsing(const u_char *packet, int length,
+struct authority_t authority_parsing(const u_char *packet,
+                                     u_char *copy_packet, int length,
                                      int verbose);
 
 void dns_analyzer(const u_char *packet, int lenght, int verbose);
