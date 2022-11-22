@@ -55,6 +55,9 @@ struct bootp {
 #define BOOTREPLY 2
 #define BOOTREQUEST 1
 
+#define BOOTPUNICAST 0
+#define BOOTPBROADCAST 0x8000
+
 #define HTYPE_ETHER 1
 
 /*

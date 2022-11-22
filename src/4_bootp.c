@@ -6,16 +6,26 @@ void bootp_analyzer(const u_char *packet, int length, int verbose) {
 
     printf(GRN "Bootp protocol" NC "\n");
 
+    PRV1(printf("Message type : "), verbose);
     if (bootp_header->bp_op == BOOTREQUEST)
-        PRV1(printf("Request\n"), verbose);
+        PRV1(printf("Request"), verbose);
     else if (bootp_header->bp_op == BOOTREPLY)
-        PRV1(printf("Reply\n"), verbose);
+        PRV1(printf("Reply"), verbose);
+    PRV1(printf("\n"), verbose);
 
     if (bootp_header->bp_htype == HTYPE_ETHER)
-        PRV1(printf("Ethernet\n"), verbose);
+        PRV1(printf("Hardware type : Ethernet\n"), verbose);
 
-    // print transaction id in frame form
-    PRV1(printf("Transaction ID : %02x:%02x:%02x:%02x\n",
+    PRV1(printf("Flags : "), verbose);
+    if (bootp_header->bp_flags == BOOTPUNICAST)
+        PRV1(printf("Unicast (0x%02x)", bootp_header->bp_flags),
+             verbose);
+    else if (ntohs(bootp_header->bp_flags) & BOOTPBROADCAST)
+        PRV1(printf("Broadcast (0x%02x)", bootp_header->bp_flags),
+             verbose);
+    PRV1(printf("\n"), verbose);
+
+    PRV2(printf("Transaction ID : %02x:%02x:%02x:%02x\n",
                 bootp_header->bp_xid[0], bootp_header->bp_xid[1],
                 bootp_header->bp_xid[2], bootp_header->bp_xid[3]),
          verbose);
@@ -43,10 +53,9 @@ void bootp_analyzer(const u_char *packet, int length, int verbose) {
 
     PRV3(printf("\t\tHardware address length : %d\n"
                 "\t\tHops : %d\n"
-                "\t\tSeconds since boot began : %d\n"
-                "\t\tFlags : %d\n",
+                "\t\tSeconds since boot began : %d\n",
                 bootp_header->bp_hlen, bootp_header->bp_hops,
-                bootp_header->bp_secs, bootp_header->bp_flags),
+                bootp_header->bp_secs),
          verbose);
 
     if (bootp_header->bp_sname[0] == '\0')
@@ -116,15 +125,15 @@ void print_dhcp_option_name(const u_char *bp_vend, int i,
  */
 void print_dhcp_option_int(const u_char *bp_vend, int i, int length) {
 
-    if (i + 5 > length)
+    if (i + 5 > length || bp_vend[i + 1] != 4)
         return;
 
-    uint32_t time = 0;
-    time += bp_vend[i + 2] << 24;
-    time += bp_vend[i + 3] << 16;
-    time += bp_vend[i + 4] << 8;
-    time += bp_vend[i + 5];
-    printf("%d\n", time);
+    uint32_t j = 0;
+    j += bp_vend[i + 2] << 24;
+    j += bp_vend[i + 3] << 16;
+    j += bp_vend[i + 4] << 8;
+    j += bp_vend[i + 5];
+    printf("%d\n", j);
 }
 
 /**
@@ -135,11 +144,6 @@ void print_dhcp_option_int(const u_char *bp_vend, int i, int length) {
  */
 void bootp_vendor_specific(const u_char *bp_vend, int length,
                            int verbose) {
-
-    /*
-    problème sur tftp au niveau du contenu
-    problème sur agent remote : detecté au mauvais endroit
-    */
 
     if (bp_vend[0] == 0x63 && bp_vend[1] == 0x82 &&
         bp_vend[2] == 0x53 && bp_vend[3] == 0x63) {
@@ -655,8 +659,23 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_AGENT_CIRCUIT:
-            PRV3(printf("\t\tAgent Circuit ID : "), verbose);
-            PRV3(print_dhcp_option_int(bp_vend, i, length), verbose);
+            PRV3(printf("\t\tAgent Information Option :\n"), verbose);
+            switch (bp_vend[i + 2]) {
+            case 1:
+                PRV3(printf("\t\t\t- Circuit ID : "), verbose);
+                for (j = 0; j < bp_vend[i + 3]; j++)
+                    PRV3(printf("%0x", bp_vend[i + 4 + j]), verbose);
+                PRV3(printf("\n"), verbose);
+                break;
+            case 2:
+                PRV3(printf("\t\t\t- Remote ID : "), verbose);
+                for (j = 0; j < bp_vend[i + 3]; j++)
+                    PRV3(printf("%0x", bp_vend[i + 4 + j]), verbose);
+                PRV3(printf("\n"), verbose);
+                break;
+            default:
+                break;
+            }
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_AGENT_MASK:
