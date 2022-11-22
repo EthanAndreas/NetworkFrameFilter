@@ -18,18 +18,19 @@ struct ip6_hdr *ipv6_analyzer(const u_char *packet, int verbose) {
     PRV1(printf("Source IP : %s\n", src_ip), verbose);
     PRV1(printf("Destination IP : %s\n", dst_ip), verbose);
 
-    PRV2(printf("\tPayload Length : %d\n",
-                ntohs(ipv6_header->ip6_plen)),
-         verbose);
-    PRV2(printf("\tNext Header : %d\n", ipv6_header->ip6_nxt),
+    PRV2(printf("\tPayload Length : %d\n"
+                "\tNext Header : %d\n"
+                "\tHop Limit: %d\n",
+                ntohs(ipv6_header->ip6_plen), ipv6_header->ip6_nxt,
+                ipv6_header->ip6_hops),
          verbose);
 
-    PRV3(printf("\t\tTraffic Class : %d\n",
-                ipv6_header->ip6_flow >> 8),
-         verbose);
-    PRV3(printf("\t\tFlow Label : %d\n", ipv6_header->ip6_flow >> 20),
-         verbose);
-    PRV3(printf("\t\tHop Limit: %d\n", ipv6_header->ip6_hops),
+    PRV3(printf("\t\tTraffic Class : 0x%02x (%d)\n"
+                "\t\tFlow Label : 0x%02x (%d)\n",
+                ipv6_header->ip6_flow >> 8,
+                ipv6_header->ip6_flow >> 8,
+                ipv6_header->ip6_flow >> 20,
+                ipv6_header->ip6_flow >> 20),
          verbose);
 
     return ipv6_header;

@@ -28,7 +28,10 @@ struct udphdr *udp_analyzer(const u_char *packet, int verbose) {
                 ntohs(udp_header->uh_dport)),
          verbose);
 
-    PRV2(printf("\tLength : %d\n", ntohs(udp_header->uh_ulen)),
+    PRV2(printf("\tLength : %d\n"
+                "\tChecksum : 0x%02x (%d)\n",
+                ntohs(udp_header->uh_ulen), ntohs(udp_header->uh_sum),
+                ntohs(udp_header->uh_sum)),
          verbose);
 
     return udp_header;

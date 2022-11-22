@@ -167,8 +167,8 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             break;
         case TAG_GATEWAY:
             PRV2(printf("\tRouter : "), verbose);
-            i += bp_vend[i + 1] + 1;
             PRV2(print_dhcp_option_addr(bp_vend, i, length), verbose);
+            i += bp_vend[i + 1] + 1;
             break;
         case TAG_TIME_SERVER:
             i += bp_vend[i + 1] + 1;
@@ -482,7 +482,10 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_TFTP_SERVER:
-            PRV3(printf("\t\tTFTP server\n"), verbose);
+            PRV3(printf("\t\tTFTP server : "), verbose);
+            for (j = 0; j < bp_vend[i + 1]; j++)
+                PRV3(printf("%c", bp_vend[i + 2 + j]), verbose);
+            PRV3(printf("\n"), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_BOOTFILENAME:
@@ -673,7 +676,59 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_AUTH:
-            PRV3(printf("\t\tAuthentication\n"), verbose);
+            PRV3(printf("\t\tAuthentication :\n"), verbose);
+            switch (bp_vend[i + 2]) {
+            case 1:
+                PRV3(printf("\t\t\t- Protocol : Delayed "
+                            "authentification\n"),
+                     verbose);
+                break;
+            case 2:
+                PRV3(printf("\t\t\t- Protocol : Reconfigure key\n"),
+                     verbose);
+                break;
+            case 3:
+                PRV3(printf("\t\t\t- Protocol : HMAC-MD5\n"),
+                     verbose);
+                break;
+            case 4:
+                PRV3(printf("\t\t\t- Protocol : HMAC-SHA1\n"),
+                     verbose);
+                break;
+            default:
+                break;
+            }
+
+            PRV3(printf("\t\t\t- Algorithm : "), verbose);
+            switch (bp_vend[i + 3]) {
+            case 1:
+                PRV3(printf("HMAC-MD5\n"), verbose);
+                break;
+            case 2:
+                PRV3(printf("HMAC-SHA1\n"), verbose);
+                break;
+            default:
+                break;
+            }
+
+            PRV3(printf("\t\t\t- RDM : "), verbose);
+            switch (bp_vend[i + 4]) {
+            case 0:
+                PRV3(printf("Monotonically-increasing counter\n"),
+                     verbose);
+                break;
+            case 1:
+                PRV3(printf("Replay detection\n"), verbose);
+                break;
+            case 2:
+                PRV3(
+                    printf(
+                        "Replay detection and broadcast/multicast\n"),
+                    verbose);
+                break;
+            default:
+                break;
+            }
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_VINES_SERVERS:
