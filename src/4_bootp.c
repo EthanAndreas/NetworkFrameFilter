@@ -2,6 +2,10 @@
 
 void bootp_analyzer(const u_char *packet, int length, int verbose) {
 
+    // if no data, it is just a tcp/udp packet
+    if (length < 1)
+        return;
+
     struct bootp *bootp_header = (struct bootp *)packet;
 
     printf(GRN "Bootp protocol" NC "\n");

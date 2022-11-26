@@ -1,5 +1,5 @@
 CC ?= gcc
-CFLAGS ?= -O0 -Wall -Werror -g -lpcap
+CFLAGS ?= -Og -Wall -Werror -g -lpcap
 LDLIBS ?= -lm 
 
 INCLUDE_DIR = ./include
