@@ -4,7 +4,7 @@ struct iphdr *ip_analyzer(const u_char *packet, int verbose) {
 
     struct iphdr *ip = (struct iphdr *)packet;
 
-    PRV1(printf(GRN "IP Header" NC "\n"), verbose);
+    PRV1(printf("\n" GRN "IP Header" NC "\n"), verbose);
 
     PRV1(printf("IP version : %d\n", ip->version), verbose);
 

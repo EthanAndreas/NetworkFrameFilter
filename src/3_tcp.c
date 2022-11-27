@@ -23,10 +23,8 @@ void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
     }
 
     if (ntohs(tcp_header->th_dport) == HTTP_PORT ||
-        ntohs(tcp_header->th_sport) == HTTP_PORT)
-        http_analyzer(packet, length, verbose);
-
-    if (ntohs(tcp_header->th_dport) == HTTP2_PORT ||
+        ntohs(tcp_header->th_sport) == HTTP_PORT ||
+        ntohs(tcp_header->th_dport) == HTTP2_PORT ||
         ntohs(tcp_header->th_sport) == HTTP2_PORT)
         http_analyzer(packet, length, verbose);
 
@@ -51,7 +49,7 @@ struct tcphdr *tcp_analyzer(const u_char *packet, int verbose) {
 
     struct tcphdr *tcp_header = (struct tcphdr *)packet;
 
-    PRV1(printf(GRN "TCP Header" NC "\n"), verbose);
+    PRV1(printf("\n" GRN "TCP Header" NC "\n"), verbose);
 
     PRV1(printf("Source port : %d\n"
                 "Destination port : %d\n",

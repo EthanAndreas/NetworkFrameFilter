@@ -1,6 +1,6 @@
 #include "../include/1_ethernet.h"
 
-char *ether_ntoa_r(const struct ether_addr *addr, char *buf) {
+char *addr_mac_print(const struct ether_addr *addr, char *buf) {
 
     int ret_snprintf = snprintf(
         buf, 18, "%02x:%02x:%02x:%02x:%02x:%02x",
@@ -10,7 +10,7 @@ char *ether_ntoa_r(const struct ether_addr *addr, char *buf) {
 
     if (ret_snprintf < 0) {
 
-        printf("Error in ether_ntoa_r\n");
+        printf("Error in addr_mac_print\n");
         exit(1);
     }
 
@@ -20,20 +20,21 @@ char *ether_ntoa_r(const struct ether_addr *addr, char *buf) {
 struct ether_header *ethernet_analyzer(const u_char *packet,
                                        int verbose) {
 
-    static char buf[18];
     struct ether_header *eth_header = (struct ether_header *)packet;
 
     printf(GRN "Ethernet Header" NC "\n");
 
+    char buf[18];
+
     PRV1(printf(
-             "Address MAC source : %s\n",
-             ether_ntoa_r(
+             "Source MAC : %s\n",
+             addr_mac_print(
                  (struct ether_addr *)eth_header->ether_shost, buf)),
          verbose);
 
     PRV1(printf(
-             "Address MAC destination : %s\n",
-             ether_ntoa_r(
+             "Destination MAC : %s\n",
+             addr_mac_print(
                  (struct ether_addr *)eth_header->ether_dhost, buf)),
          verbose);
 
