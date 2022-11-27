@@ -1,6 +1,6 @@
 # Network Frame Filter
 
-Analyze network frame on severals protocols such as Bootp, DNS, SMTP, DHCP, FTP or ICMP <br />
+Analyze network frame on severals protocols such as Bootp, DNS, SMTP, DHCP etc... <br />
 (refer to the documentation for the protocols supported). <br />
 Availabilities of analyzing online frame on your Laptop's port, or offline with the assets given. <br />
 <br />
@@ -13,8 +13,71 @@ The name of files in source and include repertories are prefixed by the number o
 3 - Transport <br />
 4 - Application <br />
 
+## Launch
+
+### Online
+
+```bash
+sudo ./bin/exe -i <interface> -v <verbosity> -f <filter>
+```
+
+### Offline
+
+```bash
+sudo ./bin/exe -o <file> -v <verbosity> -f <filter>
+```
+
+### Help
+
+```bash
+sudo ./bin/exe -h
+```
+
+## Protocols supported
+
+### Physical
+
+- Ethernet
+
+### Network
+
+- IPv4
+- ARP
+- IPv6
+
+### Transport
+
+- UDP
+- TCP
+
+### Application
+
+- DNS
+- BOOTP
+- DHCP
+- SMTP
+- HTTP
+- FTP
+- POP3
+- IMAP
+
+## Verbosity
+
+Verbosity is a number between 1 and 3. <br />
+1 - Only essential informations (@Mac, @IP ...) and protocols' name <br />
+2 - Essential informations and their complements (Length of the packet, Time to live ...)<br />
+3 - All informations is printed<br />
+
+## Filter
+
+in work
+
+## Authors
+
+- **Ethan Huret**
+
 ## Credit
 
 You can find the assets used at the following address : <br />
-packetlife.net/captures/protocol/ <br />
+<https://packetlife.net/captures/protocol/> <br />
 With the download of the packets, you can compare the informations printed with the CloudShark given by packets. <br />
