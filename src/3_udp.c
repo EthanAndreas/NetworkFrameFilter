@@ -1,15 +1,48 @@
 #include "../include/3_udp.h"
 
+/**
+ * @brief Print informations contained in UDP header and return the
+ * header in a structure
+ * @return struct udphdr*
+ */
+struct udphdr *udp_analyzer(const u_char *packet, int verbose) {
+
+    struct udphdr *udp_header = (struct udphdr *)packet;
+
+    PRV1(printf("\n" GRN "UDP Header" NC "\n"), verbose);
+
+    PRV1(printf("Source port : %d\n"
+                "Destination port : %d\n",
+                ntohs(udp_header->uh_sport),
+                ntohs(udp_header->uh_dport)),
+         verbose);
+
+    PRV2(printf("\tLength : %d\n"
+                "\tChecksum : 0x%02x (%d)\n",
+                ntohs(udp_header->uh_ulen), ntohs(udp_header->uh_sum),
+                ntohs(udp_header->uh_sum)),
+         verbose);
+
+    return udp_header;
+}
+
+/**
+ * @brief Get the protocol under UDP header
+ */
 void get_protocol_udp(const u_char *packet, struct udphdr *udp_header,
                       int length, int verbose) {
+
+    if (ntohs(udp_header->uh_dport) == BOOTP_PORT ||
+        ntohs(udp_header->uh_sport) == BOOTP_PORT)
+        bootp_analyzer(packet, length, verbose);
 
     if (ntohs(udp_header->uh_dport) == DNS_PORT ||
         ntohs(udp_header->uh_sport) == DNS_PORT)
         dns_analyzer(packet, length, verbose);
 
-    if (ntohs(udp_header->uh_dport) == BOOTP_PORT ||
-        ntohs(udp_header->uh_sport) == BOOTP_PORT)
-        bootp_analyzer(packet, length, verbose);
+    if (ntohs(udp_header->uh_dport) == SMTP_PORT ||
+        ntohs(udp_header->uh_sport) == SMTP_PORT)
+        smtp_analyzer(packet, length, verbose);
 
     if (ntohs(udp_header->uh_dport) == HTTP_PORT ||
         ntohs(udp_header->uh_sport) == HTTP_PORT)
@@ -17,7 +50,8 @@ void get_protocol_udp(const u_char *packet, struct udphdr *udp_header,
 
     if (ntohs(udp_header->uh_dport) == HTTP2_PORT ||
         ntohs(udp_header->uh_sport) == HTTP2_PORT)
-        http_analyzer(packet, length, verbose);
+        PRV1(printf("\n" GRN "Transport Layer Security" NC "\n"),
+             verbose);
 
     if (ntohs(udp_header->uh_dport) == FTP_PORT ||
         ntohs(udp_header->uh_sport) == FTP_PORT)
@@ -34,25 +68,4 @@ void get_protocol_udp(const u_char *packet, struct udphdr *udp_header,
     if (ntohs(udp_header->uh_dport) == TELNET_PORT ||
         ntohs(udp_header->uh_sport) == TELNET_PORT)
         telnet_analyzer(packet, length, verbose);
-}
-
-struct udphdr *udp_analyzer(const u_char *packet, int verbose) {
-
-    struct udphdr *udp_header = (struct udphdr *)packet;
-
-    PRV1(printf(GRN "UDP Header" NC "\n"), verbose);
-
-    PRV1(printf("Source port : %d\n"
-                "Destination port : %d\n",
-                ntohs(udp_header->uh_sport),
-                ntohs(udp_header->uh_dport)),
-         verbose);
-
-    PRV2(printf("\tLength : %d\n"
-                "\tChecksum : 0x%02x (%d)\n",
-                ntohs(udp_header->uh_ulen), ntohs(udp_header->uh_sum),
-                ntohs(udp_header->uh_sum)),
-         verbose);
-
-    return udp_header;
 }

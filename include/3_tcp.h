@@ -11,9 +11,10 @@
 #include "../include/4_telnet.h"
 #include "../include/include.h"
 
+struct tcphdr *tcp_analyzer(const u_char *packet, int verbose);
+
 void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
                       int length, int verbose);
-struct tcphdr *tcp_analyzer(const u_char *packet, int verbose);
 
 void tcp_flags(uint8_t flags, int verbose);
 

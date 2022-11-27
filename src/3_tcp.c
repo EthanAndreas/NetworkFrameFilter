@@ -1,50 +1,10 @@
 #include "../include/3_tcp.h"
 
-void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
-                      int length, int verbose) {
-
-    if (ntohs(tcp_header->th_dport) == DNS_PORT ||
-        ntohs(tcp_header->th_sport) == DNS_PORT)
-        dns_analyzer(packet, length, verbose);
-
-    if (ntohs(tcp_header->th_dport) == BOOTP_PORT ||
-        ntohs(tcp_header->th_sport) == BOOTP_PORT)
-        bootp_analyzer(packet, length, verbose);
-
-    int i;
-    int smtp[NB_SMTP] = {SMTP_1, SMTP_2, SMTP_3, SMTP_4, SMTP_5};
-    for (i = 0; i < NB_SMTP; i++) {
-
-        if ((ntohs(tcp_header->th_dport) == smtp[i] ||
-             ntohs(tcp_header->th_sport) == smtp[i]) &&
-            (tcp_header->th_flags & TH_ACK) &&
-            (tcp_header->th_flags & TH_PUSH))
-            smtp_analyzer(packet, length, verbose);
-    }
-
-    if (ntohs(tcp_header->th_dport) == HTTP_PORT ||
-        ntohs(tcp_header->th_sport) == HTTP_PORT ||
-        ntohs(tcp_header->th_dport) == HTTP2_PORT ||
-        ntohs(tcp_header->th_sport) == HTTP2_PORT)
-        http_analyzer(packet, length, verbose);
-
-    if (ntohs(tcp_header->th_dport) == TELNET_PORT ||
-        ntohs(tcp_header->th_sport) == TELNET_PORT)
-        telnet_analyzer(packet, length, verbose);
-
-    if (ntohs(tcp_header->th_dport) == FTP_PORT ||
-        ntohs(tcp_header->th_sport) == FTP_PORT)
-        ftp_analyzer(packet, length, verbose);
-
-    if (ntohs(tcp_header->th_dport) == POP3_PORT ||
-        ntohs(tcp_header->th_sport) == POP3_PORT)
-        pop3_analyzer(packet, length, verbose);
-
-    if (ntohs(tcp_header->th_dport) == IMAP_PORT ||
-        ntohs(tcp_header->th_sport) == IMAP_PORT)
-        imap_analyzer(packet, length, verbose);
-}
-
+/**
+ * @brief Print informations contained in TCP header and return the
+ * header in a structure
+ * @return struct tcphdr*
+ */
 struct tcphdr *tcp_analyzer(const u_char *packet, int verbose) {
 
     struct tcphdr *tcp_header = (struct tcphdr *)packet;
@@ -76,6 +36,52 @@ struct tcphdr *tcp_analyzer(const u_char *packet, int verbose) {
     tcp_options(packet, tcp_header->th_off, verbose);
 
     return tcp_header;
+}
+
+/**
+ * @brief Get the protocol under TCP header
+ */
+void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
+                      int length, int verbose) {
+
+    if (ntohs(tcp_header->th_dport) == BOOTP_PORT ||
+        ntohs(tcp_header->th_sport) == BOOTP_PORT)
+        bootp_analyzer(packet, length, verbose);
+
+    if (ntohs(tcp_header->th_dport) == DNS_PORT ||
+        ntohs(tcp_header->th_sport) == DNS_PORT)
+        dns_analyzer(packet, length, verbose);
+
+    if ((ntohs(tcp_header->th_dport) == SMTP_PORT ||
+         ntohs(tcp_header->th_sport) == SMTP_PORT) &&
+        (tcp_header->th_flags & TH_ACK) &&
+        (tcp_header->th_flags & TH_PUSH))
+        smtp_analyzer(packet, length, verbose);
+
+    if (ntohs(tcp_header->th_dport) == HTTP_PORT ||
+        ntohs(tcp_header->th_sport) == HTTP_PORT)
+        http_analyzer(packet, length, verbose);
+
+    if (ntohs(tcp_header->th_dport) == HTTP2_PORT ||
+        ntohs(tcp_header->th_sport) == HTTP2_PORT)
+        PRV1(printf("\n" GRN "Transport Layer Security" NC "\n"),
+             verbose);
+
+    if (ntohs(tcp_header->th_dport) == FTP_PORT ||
+        ntohs(tcp_header->th_sport) == FTP_PORT)
+        ftp_analyzer(packet, length, verbose);
+
+    if (ntohs(tcp_header->th_dport) == POP3_PORT ||
+        ntohs(tcp_header->th_sport) == POP3_PORT)
+        pop3_analyzer(packet, length, verbose);
+
+    if (ntohs(tcp_header->th_dport) == IMAP_PORT ||
+        ntohs(tcp_header->th_sport) == IMAP_PORT)
+        imap_analyzer(packet, length, verbose);
+
+    if (ntohs(tcp_header->th_dport) == TELNET_PORT ||
+        ntohs(tcp_header->th_sport) == TELNET_PORT)
+        telnet_analyzer(packet, length, verbose);
 }
 
 /**
@@ -186,8 +192,6 @@ void tcp_options(const u_char *packet, uint8_t offset, int verbose) {
             nb_options++;
             break;
         default:
-            PRV3(printf("\n\t\t- Unknown option : %d", packet[i]),
-                 verbose);
             break;
         }
     }

@@ -16,24 +16,16 @@
 #include <string.h>
 
 // Application protocol
-#define DATA_FTP 20
+#define DATA_FTP_PORT 20
 #define FTP_PORT 21
 #define TELNET_PORT 23
+#define SMTP_PORT 25
 #define DNS_PORT 53
 #define BOOTP_PORT 67
 #define HTTP_PORT 80
 #define POP3_PORT 110
 #define IMAP_PORT 143
 #define HTTP2_PORT 443
-#define IMAPS_PORT 993
-#define POP3S_PORT 995
-
-#define NB_SMTP 5
-#define SMTP_1 25
-#define SMTP_2 465
-#define SMTP_3 587
-#define SMTP_4 2525
-#define SMTP_5 25025
 
 // Print with verbose level
 #define PRV1(op, v)                     \
@@ -77,6 +69,3 @@
           "                 " NC
 
 #endif
-
-// Lien des assets
-// packetlife.net/captures/protocol/
