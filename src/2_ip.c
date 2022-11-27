@@ -1,12 +1,15 @@
 #include "../include/2_ip.h"
 
+/**
+ * @brief Print informations contained in IPv4 header and return the
+ * header in a structure
+ * @return struct iphdr*
+ */
 struct iphdr *ip_analyzer(const u_char *packet, int verbose) {
 
     struct iphdr *ip = (struct iphdr *)packet;
 
-    PRV1(printf("\n" GRN "IP Header" NC "\n"), verbose);
-
-    PRV1(printf("IP version : %d\n", ip->version), verbose);
+    PRV1(printf("\n" GRN "IPv4 Header" NC "\n"), verbose);
 
     PRV1(printf("IP source : %s\n",
                 inet_ntoa(*(struct in_addr *)&ip->saddr)),

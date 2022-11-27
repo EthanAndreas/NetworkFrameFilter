@@ -1,14 +1,18 @@
 #include "../include/4_bootp.h"
 
+/**
+ * @brief Print informations contained in BOOTP header
+ */
 void bootp_analyzer(const u_char *packet, int length, int verbose) {
 
-    // if no data, it is just a tcp/udp packet
-    if (length < 1)
+    // if there is no data left of a padding empty, it is just a
+    // tcp/udp packet
+    if (length < 1 || packet[0] == 0)
         return;
 
     struct bootp *bootp_header = (struct bootp *)packet;
 
-    printf(GRN "Bootp protocol" NC "\n");
+    printf("\n" GRN "Bootp protocol" NC "\n");
 
     PRV1(printf("Message type : "), verbose);
     if (bootp_header->bp_op == BOOTREQUEST)
@@ -137,7 +141,8 @@ void print_dhcp_option_int(const u_char *bp_vend, int i, int length) {
     j += bp_vend[i + 3] << 16;
     j += bp_vend[i + 4] << 8;
     j += bp_vend[i + 5];
-    printf("%d\n", j);
+    printf("%d", j);
+    printf("\n");
 }
 
 /**
@@ -151,7 +156,7 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
 
     if (bp_vend[0] == 0x63 && bp_vend[1] == 0x82 &&
         bp_vend[2] == 0x53 && bp_vend[3] == 0x63) {
-        PRV1(printf(GRN "DHCP protocol" NC "\n"), verbose);
+        PRV1(printf("\n" GRN "DHCP protocol" NC "\n"), verbose);
     }
 
     int i = 0, j;
@@ -164,8 +169,8 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
 
         // RFC1048
         case TAG_SUBNET_MASK:
-            PRV2(printf("\tSubnet mask : "), verbose);
-            PRV2(print_dhcp_option_addr(bp_vend, i, length), verbose);
+            PRV3(printf("\t\tSubnet mask : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i, length), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_TIME_OFFSET:
@@ -174,8 +179,8 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             i += 5;
             break;
         case TAG_GATEWAY:
-            PRV2(printf("\tRouter : "), verbose);
-            PRV2(print_dhcp_option_addr(bp_vend, i, length), verbose);
+            PRV3(printf("\t\tRouter : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i, length), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_TIME_SERVER:
@@ -187,8 +192,8 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_DOMAIN_SERVER:
-            PRV2(printf("\tDNS : "), verbose);
-            PRV2(print_dhcp_option_addr(bp_vend, i, length), verbose);
+            PRV3(printf("\t\tDNS : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i, length), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_LOG_SERVER:
@@ -480,8 +485,8 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_IP_LEASE:
-            PRV2(printf("\tLease time : "), verbose);
-            PRV2(print_dhcp_option_int(bp_vend, i, length), verbose);
+            PRV3(printf("\t\tLease time : "), verbose);
+            PRV3(print_dhcp_option_int(bp_vend, i, length), verbose);
             i += 5;
             break;
         case TAG_OPT_OVERLOAD:
@@ -502,50 +507,50 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_DHCP_MESSAGE:
-            PRV2(printf("\tDHCP message type : "), verbose);
+            PRV3(printf("\t\tDHCP message type : "), verbose);
             // print the message type of dhcp
             for (j = 1; j <= bp_vend[i + 1]; j++) {
                 switch (bp_vend[i + 1 + j]) {
                 case DHCPDISCOVER:
-                    PRV2(printf("Discover "), verbose);
+                    PRV3(printf("Discover "), verbose);
                     break;
                 case DHCPOFFER:
-                    PRV2(printf("Offer "), verbose);
+                    PRV3(printf("Offer "), verbose);
                     break;
                 case DHCPREQUEST:
-                    PRV2(printf("Request "), verbose);
+                    PRV3(printf("Request "), verbose);
                     break;
                 case DHCPDECLINE:
-                    PRV2(printf("Decline "), verbose);
+                    PRV3(printf("Decline "), verbose);
                     break;
                 case DHCPACK:
-                    PRV2(printf("Ack "), verbose);
+                    PRV3(printf("Ack "), verbose);
                     break;
                 case DHCPNAK:
-                    PRV2(printf("Nack "), verbose);
+                    PRV3(printf("Nack "), verbose);
                     break;
                 case DHCPRELEASE:
-                    PRV2(printf("Release "), verbose);
+                    PRV3(printf("Release "), verbose);
                     break;
                 case DHCPINFORM:
-                    PRV2(printf("Inform "), verbose);
+                    PRV3(printf("Inform "), verbose);
                     break;
                 default:
                     break;
                 }
-                PRV2(printf("\n"), verbose);
+                PRV3(printf("\n"), verbose);
             }
 
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_SERVER_ID:
-            PRV2(printf("\tDHCP server : "), verbose);
-            PRV2(print_dhcp_option_addr(bp_vend, i, length), verbose);
+            PRV3(printf("\t\tDHCP server : "), verbose);
+            PRV3(print_dhcp_option_addr(bp_vend, i, length), verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_PARM_REQUEST:
-            PRV3(printf("\t\tParameter request list"), verbose);
-            PRV3(print_dhcp_option_name(bp_vend, i, length), verbose);
+            PRV3(printf("\t\tParameter request list :\n"), verbose);
+            parameter_request_list_print(bp_vend, i + 2, verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_MESSAGE:
@@ -555,7 +560,9 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             break;
         case TAG_MAX_MSG_SIZE:
             PRV3(printf("\t\tMaximum DHCP message size : "), verbose);
-            PRV3(print_dhcp_option_int(bp_vend, i, length), verbose);
+            PRV3(
+                printf("%d\n", bp_vend[i + 2] * 256 + bp_vend[i + 3]),
+                verbose);
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_RENEWAL_TIME:
@@ -598,8 +605,8 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
 
         // RFC 2485
         case TAG_OPEN_GROUP_UAP:
-            PRV3(printf(
-                     "Open Group's User Authentication Protocol : "),
+            PRV3(printf("Open Group's User Authentication "
+                        "Protocol : "),
                  verbose);
             PRV3(print_dhcp_option_name(bp_vend, i, length), verbose);
             i += bp_vend[i + 1] + 1;
@@ -614,8 +621,8 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
 
         // RFC 2610
         case TAG_SLP_DA:
-            PRV3(printf(
-                     "Service Location Protocol Directory Agent : "),
+            PRV3(printf("Service Location Protocol Directory "
+                        "Agent : "),
                  verbose);
             PRV3(print_dhcp_option_addr(bp_vend, i, length), verbose);
             i += bp_vend[i + 1] + 1;
@@ -650,8 +657,8 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_SLP_NAMING_AUTH:
-            PRV3(printf(
-                     "Service Location Protocol Naming Authority : "),
+            PRV3(printf("Service Location Protocol Naming "
+                        "Authority : "),
                  verbose);
             PRV3(print_dhcp_option_name(bp_vend, i, length), verbose);
             i += bp_vend[i + 1] + 1;
@@ -744,10 +751,9 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
                 PRV3(printf("Replay detection\n"), verbose);
                 break;
             case 2:
-                PRV3(
-                    printf(
-                        "Replay detection and broadcast/multicast\n"),
-                    verbose);
+                PRV3(printf("Replay detection and "
+                            "broadcast/multicast\n"),
+                     verbose);
                 break;
             default:
                 break;
@@ -858,5 +864,35 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             break;
         }
         i++;
+    }
+}
+
+void parameter_request_list_print(const u_char *bp_vend, int start,
+                                  int verbose) {
+    int i, length = bp_vend[start + 1] + start;
+
+    for (i = start; i < length; i++) {
+        switch (bp_vend[i]) {
+        case TAG_SUBNET_MASK:
+            PRV3(printf("\t\t\t- Subnet mask\n"), verbose);
+            break;
+        case TAG_TIME_OFFSET:
+            PRV3(printf("\t\t\t- Time offset\n"), verbose);
+            break;
+        case TAG_GATEWAY:
+            PRV3(printf("\t\t\t- Router\n"), verbose);
+            break;
+        case TAG_TIME_SERVER:
+            PRV3(printf("\t\t\t- Time server\n"), verbose);
+            break;
+        case TAG_NAME_SERVER:
+            PRV3(printf("\t\t\t- Name server\n"), verbose);
+            break;
+        case TAG_DOMAIN_SERVER:
+            PRV3(printf("\t\t\t- Domain name\n"), verbose);
+            break;
+
+            // to complete ...
+        }
     }
 }

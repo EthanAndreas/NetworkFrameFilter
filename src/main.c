@@ -8,15 +8,25 @@
 #include "../include/include.h"
 #include "../include/option.h"
 
+/**
+ * @brief Take the packet read by pcap_loop and print each header with
+ * calling Physical, Network and Transport layer analyzers. Transport
+ * layers call Application layer analyzers.
+ * @param args - contain the verbose level
+ * @param header - contain the timestamp and the length of the packet
+ * @param packet
+ */
 void got_packet(u_char *args, const struct pcap_pkthdr *header,
                 const u_char *packet) {
 
     int verbose = (int)args[0] - 48;
+    int length = header->len;
 
     // Ethernet Header
     struct ether_header *eth_header =
         ethernet_analyzer(packet, verbose);
     packet += sizeof(struct ether_header);
+    length -= sizeof(struct ether_header);
 
     // Network Layer
     struct iphdr *ip_header;
@@ -30,77 +40,86 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     // Get the network protocol
     switch (htons(eth_header->ether_type)) {
 
+    // IPv4 protocol
     case ETHERTYPE_IP:
+
         ip_header = ip_analyzer(packet, verbose);
         packet += ip_header->ihl * 4;
+        length -= ip_header->ihl * 4;
 
+        // TCP protocol
         if (ip_header->protocol == IPPROTO_TCP) {
 
             tcp_header = tcp_analyzer(packet, verbose);
             packet += tcp_header->th_off * 4;
+            length -= tcp_header->th_off * 4;
 
-            get_protocol_tcp(packet, tcp_header,
-                             ntohs(ip_header->tot_len) -
-                                 ip_header->ihl * 4 -
-                                 tcp_header->th_off * 4,
-                             verbose);
+            // Get the application layer protocol
+            get_protocol_tcp(packet, tcp_header, length, verbose);
+        }
 
-        } else if (ip_header->protocol == IPPROTO_UDP) {
+        // UDP protocol
+        else if (ip_header->protocol == IPPROTO_UDP) {
 
             udp_header = udp_analyzer(packet, verbose);
             packet += sizeof(struct udphdr);
+            length -= sizeof(struct udphdr);
 
-            get_protocol_udp(packet, udp_header, udp_header->len,
-                             verbose);
+            // Get the application layer protocol
+            get_protocol_udp(packet, udp_header, length, verbose);
         }
 
         break;
+
+    // IPv6 protocol
     case ETHERTYPE_IPV6:
+
         ipv6_header = ipv6_analyzer(packet, verbose);
         packet += sizeof(struct ip6_hdr);
+        length -= sizeof(struct ip6_hdr);
 
+        // TCP protocol
         if (ipv6_header->ip6_nxt == IPPROTO_TCP) {
 
             tcp_header = tcp_analyzer(packet, verbose);
             packet += tcp_header->th_off * 4;
+            length -= tcp_header->th_off * 4;
 
-            get_protocol_tcp(packet, tcp_header,
-                             ntohs(ipv6_header->ip6_plen) -
-                                 tcp_header->th_off * 4,
-                             verbose);
-        } else if (ipv6_header->ip6_nxt == IPPROTO_UDP) {
+            get_protocol_tcp(packet, tcp_header, length, verbose);
+        }
+
+        // UDP protocol
+        else if (ipv6_header->ip6_nxt == IPPROTO_UDP) {
 
             udp_header = udp_analyzer(packet, verbose);
             packet += sizeof(struct udphdr);
+            length -= sizeof(struct udphdr);
 
-            get_protocol_udp(packet, udp_header, udp_header->len,
-                             verbose);
+            // Get the application layer protocol
+            get_protocol_udp(packet, udp_header, length, verbose);
         }
 
         break;
-    case ETHERTYPE_VLAN:
-        // skip vlan header
-        packet += 4;
 
-        ipv6_header = ipv6_analyzer(packet, verbose);
-        packet += sizeof(struct ip6_hdr);
-
-        break;
+    // ARP protocol
     case ETHERTYPE_ARP:
         arp_header = arp_analyzer(packet, verbose);
-
         packet += sizeof(struct ether_arp);
+        (void)arp_header;
         break;
-    default:
-        // For protocols that are not supported
-        printf(RED "Unknown protocol" NC "\n");
-    }
 
-    (void)arp_header;
+    default:
+        break;
+    }
 
     printf(COLOR_BANNER "\n");
 }
 
+/**
+ * @brief Main function
+ * @param argc
+ * @param argv
+ */
 int main(int argc, char **argv) {
 
     usage_t *usage = malloc(sizeof(usage_t));

@@ -1,12 +1,17 @@
 #include "../include/4_dns.h"
 
+/**
+ * @brief Print informations contained in DNS header and print
+ * queries, answers and authorities which can be found in the packet
+ */
 void dns_analyzer(const u_char *packet, int length, int verbose) {
 
-    // if no data, it is just a tcp/udp packet
+    // if there is no data left of a padding empty, it is just a
+    // tcp/udp packet
     if (length < 1)
         return;
 
-    PRV1(printf(GRN "DNS Protocol" NC "\n"), verbose);
+    PRV1(printf("\n" GRN "DNS Protocol" NC "\n"), verbose);
 
     struct dns_hdr *dns_header = (struct dns_hdr *)packet;
 
@@ -52,11 +57,16 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
     }
 }
 
+/**
+ * @brief Print informations contained in DNS query and return the new
+ * offset after reading the query
+ * @return int
+ */
 int query_parsing(const u_char *packet, int offset, int length,
                   int verbose) {
 
     PRV3(printf("\t\t- Name : "), verbose);
-    offset = domain_name_reader(packet, offset, length, verbose);
+    offset = domain_name_print(packet, offset, length, verbose);
 
     uint16_t type = ntohs(*(uint16_t *)(packet + offset));
     type_print(type, verbose);
@@ -67,11 +77,16 @@ int query_parsing(const u_char *packet, int offset, int length,
     return offset + 4;
 }
 
+/**
+ * @brief Print informations contained in DNS answer and return the
+ * new offset after reading the answer
+ * @return int
+ */
 int answer_parsing(const u_char *packet, int offset, int length,
                    int verbose) {
 
     PRV3(printf("\t\t- Name : "), verbose);
-    offset = domain_name_reader(packet, offset, length, verbose);
+    offset = domain_name_print(packet, offset, length, verbose);
 
     uint16_t type = ntohs(*(uint16_t *)(packet + offset));
     type_print(type, verbose);
@@ -91,11 +106,16 @@ int answer_parsing(const u_char *packet, int offset, int length,
     return offset + 10 + rdlength;
 }
 
+/**
+ * @brief Print informations contained in DNS authority and return the
+ * new offset after reading the authority
+ * @return int
+ */
 int authority_parsing(const u_char *packet, int offset, int length,
                       int verbose) {
 
     PRV3(printf("\t\t- Name : "), verbose);
-    offset = domain_name_reader(packet, offset, length, verbose);
+    offset = domain_name_print(packet, offset, length, verbose);
 
     uint16_t type = ntohs(*(uint16_t *)(packet + offset));
     type_print(type, verbose);
@@ -115,6 +135,11 @@ int authority_parsing(const u_char *packet, int offset, int length,
     return offset + 10 + rdlength;
 }
 
+/**
+ * @brief Print data blocks contained in answers or authorities. Data
+ * blocks is differentiated by answer and authority type, and print
+ * informations in function of this type
+ */
 void data_reader(uint16_t type, const u_char *packet, int i,
                  uint16_t rdlength, int length, int verbose) {
 
@@ -134,12 +159,12 @@ void data_reader(uint16_t type, const u_char *packet, int i,
 
     case 2:
         PRV3(printf("\t\t- Name Server : "), verbose);
-        domain_name_reader(packet, i, length, verbose);
+        domain_name_print(packet, i, length, verbose);
         break;
 
     case 5:
         PRV3(printf("\t\t- Canonical Name : "), verbose);
-        domain_name_reader(packet, i, length, verbose);
+        domain_name_print(packet, i, length, verbose);
         break;
 
     case 6:
@@ -169,12 +194,12 @@ void data_reader(uint16_t type, const u_char *packet, int i,
 
     case 12:
         PRV3(printf("\t\t- Pointer : "), verbose);
-        domain_name_reader(packet, i, length, verbose);
+        domain_name_print(packet, i, length, verbose);
         break;
 
     case 15:
         PRV3(printf("\t\t- Mail Exchange : "), verbose);
-        domain_name_reader(packet, i + 2, length, verbose);
+        domain_name_print(packet, i + 2, length, verbose);
         break;
 
     case 16:
@@ -201,8 +226,12 @@ void data_reader(uint16_t type, const u_char *packet, int i,
     }
 }
 
-int domain_name_reader(const u_char *packet, int i, int length,
-                       int verbose) {
+/**
+ * @brief Print domain name contained in queries, answers and
+ * authorities
+ */
+int domain_name_print(const u_char *packet, int i, int length,
+                      int verbose) {
 
     int j, start = i;
     while (packet[i] != 0 && i < length) {
@@ -210,8 +239,7 @@ int domain_name_reader(const u_char *packet, int i, int length,
         if (packet[i] == 0xc0) {
             if (i != start)
                 PRV3(printf("."), verbose);
-            domain_name_reader(packet, packet[i + 1], length,
-                               verbose);
+            domain_name_print(packet, packet[i + 1], length, verbose);
             return i + 2;
         }
 
@@ -228,6 +256,9 @@ int domain_name_reader(const u_char *packet, int i, int length,
     return i + 1;
 }
 
+/**
+ * @brief Print name contained in SOA records
+ */
 int name_print(const u_char *packet, int i, int length, int verbose) {
 
     int j, position;
@@ -257,6 +288,9 @@ int name_print(const u_char *packet, int i, int length, int verbose) {
         return i + packet[i] + 2;
 }
 
+/**
+ * @brief Print type of queries, answers and authorities
+ */
 void type_print(u_int16_t type, int verbose) {
 
     PRV3(printf("\t\t- Type : "), verbose);
@@ -295,6 +329,9 @@ void type_print(u_int16_t type, int verbose) {
     }
 }
 
+/**
+ * @brief Print class of queries, answers and authorities
+ */
 void class_print(u_int16_t class, int verbose) {
 
     PRV3(printf("\t\t- Class : "), verbose);

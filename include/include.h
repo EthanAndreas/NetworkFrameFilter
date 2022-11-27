@@ -66,6 +66,7 @@
 
 #define COLOR_BANNER                                                 \
     GRN_B "                                                        " \
-          "                 " NC
+          "                        " NC
+#define BANNER_LENGTH 80
 
 #endif

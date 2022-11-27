@@ -24,13 +24,13 @@ sudo ./bin/exe -i <interface> -v <verbosity> -f <filter>
 ### Offline
 
 ```bash
-sudo ./bin/exe -o <file> -v <verbosity> -f <filter>
+./bin/exe -o <file> -v <verbosity> -f <filter>
 ```
 
 ### Help
 
 ```bash
-sudo ./bin/exe -h
+./bin/exe -h
 ```
 
 ## Protocols supported
@@ -74,7 +74,7 @@ in work
 
 ## Authors
 
-- **Ethan Huret**
+**Ethan Huret**
 
 ## Credit
 

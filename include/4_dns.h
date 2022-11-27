@@ -13,14 +13,7 @@ struct dns_hdr {
     u_int16_t arcount;
 };
 
-void data_reader(uint16_t type, const u_char *packet, int offset,
-                 uint16_t rdlength, int length, int verbose);
-
-int domain_name_reader(const u_char *packet, int i, int length,
-                       int verbose);
-int name_print(const u_char *packet, int i, int length, int verbose);
-void type_print(u_int16_t type, int verbose);
-void class_print(u_int16_t class, int verbose);
+void dns_analyzer(const u_char *packet, int lenght, int verbose);
 
 int query_parsing(const u_char *packet, int offset, int length,
                   int verbose);
@@ -29,6 +22,13 @@ int answer_parsing(const u_char *packet, int offset, int length,
 int authority_parsing(const u_char *packet, int offset, int length,
                       int verbose);
 
-void dns_analyzer(const u_char *packet, int lenght, int verbose);
+void data_reader(uint16_t type, const u_char *packet, int offset,
+                 uint16_t rdlength, int length, int verbose);
+
+int domain_name_print(const u_char *packet, int i, int length,
+                      int verbose);
+int name_print(const u_char *packet, int i, int length, int verbose);
+void type_print(u_int16_t type, int verbose);
+void class_print(u_int16_t class, int verbose);
 
 #endif

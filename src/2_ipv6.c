@@ -1,5 +1,10 @@
 #include "../include/2_ipv6.h"
 
+/**
+ * @brief Print informations contained in IPv6 header and return the
+ * header in a structure
+ * @return struct iphdr*
+ */
 struct ip6_hdr *ipv6_analyzer(const u_char *packet, int verbose) {
 
     struct ip6_hdr *ipv6_header = (struct ip6_hdr *)packet;
