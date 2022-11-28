@@ -10,12 +10,14 @@ void http_analyzer(const u_char *packet, int length, int verbose) {
     if (length < 1 || packet[0] == 0)
         return;
 
+    PRV1(printf("HTTP"), verbose);
+
     PRV3(printf("\n" GRN "HTTP" NC "\n"), verbose);
 
     int i;
     for (i = 0; i < length; i++) {
         if (i % BANNER_LENGTH == 0 && i != 0)
-            printf("\n");
+            PRV3(printf("\n"), verbose);
 
         if (isprint(packet[i]))
             PRV3(printf("%c", packet[i]), verbose);

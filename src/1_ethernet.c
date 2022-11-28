@@ -22,17 +22,17 @@ struct ether_header *ethernet_analyzer(const u_char *packet,
 
     struct ether_header *eth_header = (struct ether_header *)packet;
 
-    printf(GRN "Ethernet Header" NC "\n");
+    PRV3(printf(GRN "Ethernet Header" NC "\n"), verbose);
 
     char buf[18];
 
-    PRV1(printf(
+    PRV3(printf(
              "Source MAC : %s\n",
              addr_mac_print(
                  (struct ether_addr *)eth_header->ether_shost, buf)),
          verbose);
 
-    PRV1(printf(
+    PRV3(printf(
              "Destination MAC : %s\n",
              addr_mac_print(
                  (struct ether_addr *)eth_header->ether_dhost, buf)),

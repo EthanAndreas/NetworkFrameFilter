@@ -11,28 +11,29 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
     if (length < 1)
         return;
 
-    PRV1(printf("\n" GRN "DNS Protocol" NC "\n"), verbose);
+    PRV1(printf("DNS"), verbose);
+
+    PRV3(printf("\n" GRN "DNS Protocol" NC "\n"), verbose);
 
     struct dns_hdr *dns_header = (struct dns_hdr *)packet;
 
-    PRV2(printf("\tTransaction ID : 0x%0x\n", ntohs(dns_header->id)),
+    PRV3(printf("Transaction ID : 0x%0x\n", ntohs(dns_header->id)),
          verbose);
 
-    PRV2(printf("\tFlags : 0x%0x", ntohs(dns_header->flags)),
-         verbose);
+    PRV3(printf("Flags : 0x%0x", ntohs(dns_header->flags)), verbose);
     if (ntohs(dns_header->flags) & 0x8000) {
-        PRV2(printf(" (Response)\n"), verbose);
+        PRV3(printf(" (Response)\n"), verbose);
     } else {
-        PRV2(printf(" (Query)\n"), verbose);
+        PRV3(printf(" (Query)\n"), verbose);
     }
 
     int qdcount = ntohs(dns_header->qdcount),
         ancount = ntohs(dns_header->ancount),
         nscount = ntohs(dns_header->nscount);
 
-    PRV3(printf("\tQuestions : %d\n"
-                "\tAnswer RRs : %d\n"
-                "\tAuthority RRs : %d\n",
+    PRV3(printf("Questions : %d\n"
+                "Answer RRs : %d\n"
+                "Authority RRs : %d\n",
                 qdcount, ancount, nscount),
          verbose);
 
@@ -40,19 +41,19 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
 
     for (i = 0; i < qdcount; i++) {
 
-        PRV3(printf(CYN1 "\t\tQuery %d" NC "\n", i + 1), verbose);
+        PRV3(printf(CYN1 "Query %d" NC "\n", i + 1), verbose);
         offset = query_parsing(packet, offset, length, verbose);
     }
 
     for (i = 0; i < ancount; i++) {
 
-        PRV3(printf(CYN1 "\t\tAnswer %d" NC "\n", i + 1), verbose);
+        PRV3(printf(CYN1 "Answer %d" NC "\n", i + 1), verbose);
         offset = answer_parsing(packet, offset, length, verbose);
     }
 
     for (i = 0; i < nscount; i++) {
 
-        PRV3(printf(CYN1 "\t\tAuthority %d" NC "\n", i + 1), verbose);
+        PRV3(printf(CYN1 "Authority %d" NC "\n", i + 1), verbose);
         offset = authority_parsing(packet, offset, length, verbose);
     }
 }
@@ -65,7 +66,7 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
 int query_parsing(const u_char *packet, int offset, int length,
                   int verbose) {
 
-    PRV3(printf("\t\t- Name : "), verbose);
+    PRV3(printf("- Name : "), verbose);
     offset = domain_name_print(packet, offset, length, verbose);
 
     uint16_t type = ntohs(*(uint16_t *)(packet + offset));
@@ -85,7 +86,7 @@ int query_parsing(const u_char *packet, int offset, int length,
 int answer_parsing(const u_char *packet, int offset, int length,
                    int verbose) {
 
-    PRV3(printf("\t\t- Name : "), verbose);
+    PRV3(printf("- Name : "), verbose);
     offset = domain_name_print(packet, offset, length, verbose);
 
     uint16_t type = ntohs(*(uint16_t *)(packet + offset));
@@ -95,10 +96,10 @@ int answer_parsing(const u_char *packet, int offset, int length,
     class_print(class, verbose);
 
     uint32_t ttl = ntohl(*(uint32_t *)(packet + offset + 4));
-    PRV3(printf("\t\t- TTL : %d\n", ttl), verbose);
+    PRV3(printf("- TTL : %d\n", ttl), verbose);
 
     uint16_t rdlength = ntohs(*(uint16_t *)(packet + offset + 8));
-    PRV3(printf("\t\t- RD Length : %d\n", rdlength), verbose);
+    PRV3(printf("- RD Length : %d\n", rdlength), verbose);
 
     data_reader(type, packet, offset + 10, offset + 10 + rdlength,
                 length, verbose);
@@ -114,7 +115,7 @@ int answer_parsing(const u_char *packet, int offset, int length,
 int authority_parsing(const u_char *packet, int offset, int length,
                       int verbose) {
 
-    PRV3(printf("\t\t- Name : "), verbose);
+    PRV3(printf("- Name : "), verbose);
     offset = domain_name_print(packet, offset, length, verbose);
 
     uint16_t type = ntohs(*(uint16_t *)(packet + offset));
@@ -124,10 +125,10 @@ int authority_parsing(const u_char *packet, int offset, int length,
     class_print(class, verbose);
 
     uint32_t ttl = ntohl(*(uint32_t *)(packet + offset + 4));
-    PRV3(printf("\t\t- TTL : %d\n", ttl), verbose);
+    PRV3(printf("- TTL : %d\n", ttl), verbose);
 
     uint16_t rdlength = ntohs(*(uint16_t *)(packet + offset + 8));
-    PRV3(printf("\t\t- RD Length : %d\n", rdlength), verbose);
+    PRV3(printf("- RD Length : %d\n", rdlength), verbose);
 
     data_reader(type, packet, offset + 10, offset + 10 + rdlength,
                 length, verbose);
@@ -148,7 +149,7 @@ void data_reader(uint16_t type, const u_char *packet, int i,
     switch (type) {
 
     case 1:
-        PRV3(printf("\t\t- IPv4 Address : "), verbose);
+        PRV3(printf("- IPv4 Address : "), verbose);
         for (j = 0; j < 4; j++) {
             PRV3(printf("%d", packet[i + j]), verbose);
             if (j != 3)
@@ -158,52 +159,50 @@ void data_reader(uint16_t type, const u_char *packet, int i,
         break;
 
     case 2:
-        PRV3(printf("\t\t- Name Server : "), verbose);
+        PRV3(printf("- Name Server : "), verbose);
         domain_name_print(packet, i, length, verbose);
         break;
 
     case 5:
-        PRV3(printf("\t\t- Canonical Name : "), verbose);
+        PRV3(printf("- Canonical Name : "), verbose);
         domain_name_print(packet, i, length, verbose);
         break;
 
     case 6:
-        PRV3(printf("\t\t- Primary Name Server : "), verbose);
+        PRV3(printf("- Primary Name Server : "), verbose);
         i = name_print(packet, i, length, verbose);
 
-        PRV3(printf("\t\t- Responsible Authority's Mailbox : "),
-             verbose);
+        PRV3(printf("- Responsible Authority's Mailbox : "), verbose);
         i = name_print(packet, i, length, verbose);
 
         uint32_t serial_nb = ntohl(*(uint32_t *)(packet + i));
-        PRV3(printf("\t\t- Serial Number : %d\n", serial_nb),
-             verbose);
+        PRV3(printf("- Serial Number : %d\n", serial_nb), verbose);
 
         uint32_t refresh = ntohl(*(uint32_t *)(packet + i + 4));
-        PRV3(printf("\t\t- Refresh : %d\n", refresh), verbose);
+        PRV3(printf("- Refresh : %d\n", refresh), verbose);
 
         uint32_t retry = ntohl(*(uint32_t *)(packet + i + 8));
-        PRV3(printf("\t\t- Retry : %d\n", retry), verbose);
+        PRV3(printf("- Retry : %d\n", retry), verbose);
 
         uint32_t expire = ntohl(*(uint32_t *)(packet + i + 12));
-        PRV3(printf("\t\t- Expire : %d\n", expire), verbose);
+        PRV3(printf("- Expire : %d\n", expire), verbose);
 
         uint32_t minimum = ntohl(*(uint32_t *)(packet + i + 16));
-        PRV3(printf("\t\t- Minimum : %d\n", minimum), verbose);
+        PRV3(printf("- Minimum : %d\n", minimum), verbose);
         break;
 
     case 12:
-        PRV3(printf("\t\t- Pointer : "), verbose);
+        PRV3(printf("- Pointer : "), verbose);
         domain_name_print(packet, i, length, verbose);
         break;
 
     case 15:
-        PRV3(printf("\t\t- Mail Exchange : "), verbose);
+        PRV3(printf("- Mail Exchange : "), verbose);
         domain_name_print(packet, i + 2, length, verbose);
         break;
 
     case 16:
-        PRV3(printf("\t\t- Text : "), verbose);
+        PRV3(printf("- Text : "), verbose);
         for (j = 0; j < packet[i]; j++) {
             PRV3(printf("%c", packet[i + j + 1]), verbose);
         }
@@ -211,7 +210,7 @@ void data_reader(uint16_t type, const u_char *packet, int i,
         break;
 
     case 28:
-        PRV3(printf("\t\t- IPv6 Address : "), verbose);
+        PRV3(printf("- IPv6 Address : "), verbose);
         for (j = 0; j < 16; j++) {
             PRV3(printf("%x", packet[i + j]), verbose);
             if (j != 15) {
@@ -293,7 +292,7 @@ int name_print(const u_char *packet, int i, int length, int verbose) {
  */
 void type_print(u_int16_t type, int verbose) {
 
-    PRV3(printf("\t\t- Type : "), verbose);
+    PRV3(printf("- Type : "), verbose);
 
     switch (type) {
     case 1:
@@ -334,7 +333,7 @@ void type_print(u_int16_t type, int verbose) {
  */
 void class_print(u_int16_t class, int verbose) {
 
-    PRV3(printf("\t\t- Class : "), verbose);
+    PRV3(printf("- Class : "), verbose);
 
     switch (class) {
     case 1:

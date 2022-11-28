@@ -8,11 +8,13 @@
 #include "../include/include.h"
 #include "../include/option.h"
 
+int count = 0;
+
 /**
  * @brief Take the packet read by pcap_loop and print each header with
  * calling Physical, Network and Transport layer analyzers. Transport
  * layers call Application layer analyzers.
- * @param args - contain the verbose level
+ * @param args - contain the verbose verbose
  * @param header - contain the timestamp and the length of the packet
  * @param packet
  */
@@ -21,6 +23,9 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
 
     int verbose = (int)args[0] - 48;
     int length = header->len;
+
+    count++;
+    PRV1(printf("%d\t\t", count), verbose);
 
     // Ethernet Header
     struct ether_header *eth_header =
@@ -39,7 +44,6 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
 
     // Get the network protocol
     switch (htons(eth_header->ether_type)) {
-
     // IPv4 protocol
     case ETHERTYPE_IP:
 
@@ -50,7 +54,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
         // TCP protocol
         if (ip_header->protocol == IPPROTO_TCP) {
 
-            tcp_header = tcp_analyzer(packet, verbose);
+            tcp_header = tcp_analyzer(packet, length, verbose);
             packet += tcp_header->th_off * 4;
             length -= tcp_header->th_off * 4;
 
@@ -61,12 +65,16 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
         // UDP protocol
         else if (ip_header->protocol == IPPROTO_UDP) {
 
-            udp_header = udp_analyzer(packet, verbose);
+            udp_header = udp_analyzer(packet, length, verbose);
             packet += sizeof(struct udphdr);
             length -= sizeof(struct udphdr);
 
             // Get the application layer protocol
             get_protocol_udp(packet, udp_header, length, verbose);
+        }
+
+        else {
+            PRV1(printf("-\t\t\t-"), verbose);
         }
 
         break;
@@ -81,7 +89,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
         // TCP protocol
         if (ipv6_header->ip6_nxt == IPPROTO_TCP) {
 
-            tcp_header = tcp_analyzer(packet, verbose);
+            tcp_header = tcp_analyzer(packet, length, verbose);
             packet += tcp_header->th_off * 4;
             length -= tcp_header->th_off * 4;
 
@@ -91,12 +99,16 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
         // UDP protocol
         else if (ipv6_header->ip6_nxt == IPPROTO_UDP) {
 
-            udp_header = udp_analyzer(packet, verbose);
+            udp_header = udp_analyzer(packet, length, verbose);
             packet += sizeof(struct udphdr);
             length -= sizeof(struct udphdr);
 
             // Get the application layer protocol
             get_protocol_udp(packet, udp_header, length, verbose);
+        }
+
+        else {
+            PRV1(printf("-\t\t\t-"), verbose);
         }
 
         break;
@@ -112,7 +124,8 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
         break;
     }
 
-    printf(COLOR_BANNER "\n");
+    PRV1(printf("\n"), verbose);
+    PRV3(printf(COLOR_BANNER "\n"), verbose);
 }
 
 /**
@@ -129,6 +142,8 @@ int main(int argc, char **argv) {
     if (option(argc, argv, usage) == 1)
         return 1;
 
+    int verbose = (int)(usage->verbose) - 48;
+
     pcap_t *handle;
     char errbuf[PCAP_ERRBUF_SIZE];
 
@@ -142,9 +157,9 @@ int main(int argc, char **argv) {
             exit(1);
         }
 
-        printf(COLOR_BANNER "\n");
+        PRV3(printf(COLOR_BANNER "\n"), verbose);
 
-        pcap_loop(handle, -1, got_packet, &usage->level);
+        pcap_loop(handle, -1, got_packet, &usage->verbose);
 
     } else if (usage->file != NULL) {
 
@@ -154,9 +169,14 @@ int main(int argc, char **argv) {
             exit(1);
         }
 
-        printf(COLOR_BANNER "\n");
+        PRV1(printf(GRN "No.\t\t"
+                        "Source\t\t\t\t\t\tDestination\t\t\t\t\tPort"
+                        "\t\t\tProtocol" NC "\n"),
+             verbose);
 
-        pcap_loop(handle, -1, got_packet, &usage->level);
+        PRV3(printf(COLOR_BANNER "\n"), verbose);
+
+        pcap_loop(handle, -1, got_packet, &usage->verbose);
 
     } else {
 

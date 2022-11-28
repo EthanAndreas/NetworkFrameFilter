@@ -10,5 +10,7 @@ void ftp_analyzer(const u_char *packet, int length, int verbose) {
     if (length < 1 || packet[0] == 0)
         return;
 
+    PRV1(printf("FTP"), verbose);
+
     PRV3(printf("\n" GRN "FTP" NC "\n"), verbose);
 }

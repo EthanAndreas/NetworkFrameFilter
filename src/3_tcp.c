@@ -5,31 +5,40 @@
  * header in a structure
  * @return struct tcphdr*
  */
-struct tcphdr *tcp_analyzer(const u_char *packet, int verbose) {
+struct tcphdr *tcp_analyzer(const u_char *packet, int length,
+                            int verbose) {
 
     struct tcphdr *tcp_header = (struct tcphdr *)packet;
 
-    PRV1(printf("\n" GRN "TCP Header" NC "\n"), verbose);
+    PRV1(printf("%d -> %d\t\t", ntohs(tcp_header->th_sport),
+                ntohs(tcp_header->th_dport)),
+         verbose);
 
-    PRV1(printf("Source port : %d\n"
+    if (length == tcp_header->th_off * 4 ||
+        packet[tcp_header->th_off * 4] == 0)
+        PRV1(printf("TCP"), verbose);
+
+    PRV3(printf("\n" GRN "TCP Header" NC "\n"), verbose);
+
+    PRV3(printf("Source port : %d\n"
                 "Destination port : %d\n",
                 ntohs(tcp_header->th_sport),
                 ntohs(tcp_header->th_dport)),
          verbose);
 
-    PRV2(printf("\tSequence number : %u\n"
-                "\tAcknowledgment number : %u\n"
-                "\tData offset : %d bits (%d)\n"
-                "\tFlags : ",
+    PRV3(printf("Sequence number : %u\n"
+                "Acknowledgment number : %u\n"
+                "Data offset : %d bits (%d)\n"
+                "Flags : ",
                 ntohl(tcp_header->th_seq), ntohl(tcp_header->th_ack),
                 tcp_header->th_off * 4, tcp_header->th_off),
          verbose);
     tcp_flags(tcp_header->th_flags, verbose);
 
-    PRV3(printf("\t\tWindow size : %d\n"
-                "\t\tChecksum : 0x%0x\n"
-                "\t\tUrgent pointer : %d\n"
-                "\t\tOptions : ",
+    PRV3(printf("Window size : %d\n"
+                "Checksum : 0x%0x\n"
+                "Urgent pointer : %d\n"
+                "Options : ",
                 ntohs(tcp_header->th_win), ntohs(tcp_header->th_sum),
                 ntohs(tcp_header->th_urp)),
          verbose);
@@ -93,49 +102,49 @@ void tcp_flags(uint8_t flags, int verbose) {
 
     if (flags & TH_SYN) {
         if (nb_flags != 0)
-            PRV2(printf(", "), verbose);
-        PRV2(printf("SYN"), verbose);
+            PRV3(printf(", "), verbose);
+        PRV3(printf("SYN"), verbose);
         nb_flags++;
     }
 
     if (flags & TH_ACK) {
         if (nb_flags != 0)
-            PRV2(printf(", "), verbose);
-        PRV2(printf("ACK"), verbose);
+            PRV3(printf(", "), verbose);
+        PRV3(printf("ACK"), verbose);
         nb_flags++;
     }
 
     if (flags & TH_FIN) {
         if (nb_flags != 0)
-            PRV2(printf(", "), verbose);
-        PRV2(printf("FIN"), verbose);
+            PRV3(printf(", "), verbose);
+        PRV3(printf("FIN"), verbose);
         nb_flags++;
     }
 
     if (flags & TH_RST) {
         if (nb_flags != 0)
-            PRV2(printf(", "), verbose);
-        PRV2(printf("RST"), verbose);
+            PRV3(printf(", "), verbose);
+        PRV3(printf("RST"), verbose);
         nb_flags++;
     }
 
     if (flags & TH_PUSH) {
         if (nb_flags != 0)
-            PRV2(printf(", "), verbose);
-        PRV2(printf("PUSH"), verbose);
+            PRV3(printf(", "), verbose);
+        PRV3(printf("PUSH"), verbose);
         nb_flags++;
     }
 
     if (flags & TH_URG) {
         if (nb_flags != 0)
-            PRV2(printf(", "), verbose);
-        PRV2(printf("URG"), verbose);
+            PRV3(printf(", "), verbose);
+        PRV3(printf("URG"), verbose);
         nb_flags++;
     }
 
     if (nb_flags == 0)
-        PRV2(printf("none"), verbose);
-    PRV2(printf("\n"), verbose);
+        PRV3(printf("none"), verbose);
+    PRV3(printf("\n"), verbose);
 }
 
 /**
@@ -151,37 +160,37 @@ void tcp_options(const u_char *packet, uint8_t offset, int verbose) {
         switch (packet[i]) {
 
         case TCPOPT_EOL:
-            PRV3(printf("\n\t\t- End of options list"), verbose);
+            PRV3(printf("\n- End of options list"), verbose);
             nb_options++;
             break;
         case TCPOPT_NOP:
-            PRV3(printf("\n\t\t- No operation"), verbose);
+            PRV3(printf("\n- No operation"), verbose);
             break;
         case TCPOPT_MAXSEG:
-            PRV3(printf("\n\t\t- Maximum segment size : %d bytes",
+            PRV3(printf("\n- Maximum segment size : %d bytes",
                         (packet[i + 2] << 8) + packet[i + 3]),
                  verbose);
             i += TCPOLEN_MAXSEG - 1;
             nb_options++;
             break;
         case TCPOPT_WINDOW:
-            PRV3(printf("\n\t\t- Window scale : %d", packet[i + 2]),
+            PRV3(printf("\n- Window scale : %d", packet[i + 2]),
                  verbose);
             i += TCPOLEN_WINDOW - 1;
             nb_options++;
             break;
         case TCPOPT_SACK_PERMITTED:
-            PRV3(printf("\n\t\t- SACK permitted"), verbose);
+            PRV3(printf("\n- SACK permitted"), verbose);
             i += TCPOLEN_SACK_PERMITTED - 1;
             nb_options++;
             break;
         case TCPOPT_SACK:
-            PRV3(printf("\n\t\t- SACK"), verbose);
+            PRV3(printf("\n- SACK"), verbose);
             nb_options++;
             break;
         case TCPOPT_TIMESTAMP:
             PRV3(
-                printf("\n\t\t- Timestamp : %u, Timestamp echo "
+                printf("\n- Timestamp : %u, Timestamp echo "
                        "reply : %u",
                        (packet[i + 2] << 24) + (packet[i + 3] << 16) +
                            (packet[i + 4] << 8) + packet[i + 5],

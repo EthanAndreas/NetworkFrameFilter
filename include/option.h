@@ -8,7 +8,7 @@ typedef struct usage_t {
     char *interface;
     char *file;
     char *filter;
-    u_char level;
+    u_char verbose;
 } usage_t;
 
 void init_usage(usage_t *usage);

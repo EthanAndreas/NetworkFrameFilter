@@ -5,20 +5,29 @@
  * header in a structure
  * @return struct udphdr*
  */
-struct udphdr *udp_analyzer(const u_char *packet, int verbose) {
+struct udphdr *udp_analyzer(const u_char *packet, int length,
+                            int verbose) {
 
     struct udphdr *udp_header = (struct udphdr *)packet;
 
-    PRV1(printf("\n" GRN "UDP Header" NC "\n"), verbose);
+    PRV1(printf("%d -> %d\t\t", ntohs(udp_header->uh_sport),
+                ntohs(udp_header->uh_dport)),
+         verbose);
 
-    PRV1(printf("Source port : %d\n"
+    if (length == sizeof(struct udphdr) ||
+        packet[sizeof(struct udphdr)] == 0)
+        PRV1(printf("UDP"), verbose);
+
+    PRV3(printf("\n" GRN "UDP Header" NC "\n"), verbose);
+
+    PRV3(printf("Source port : %d\n"
                 "Destination port : %d\n",
                 ntohs(udp_header->uh_sport),
                 ntohs(udp_header->uh_dport)),
          verbose);
 
-    PRV2(printf("\tLength : %d\n"
-                "\tChecksum : 0x%02x (%d)\n",
+    PRV3(printf("Length : %d\n"
+                "Checksum : 0x%02x (%d)\n",
                 ntohs(udp_header->uh_ulen), ntohs(udp_header->uh_sum),
                 ntohs(udp_header->uh_sum)),
          verbose);

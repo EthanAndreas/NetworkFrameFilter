@@ -11,7 +11,8 @@
 #include "../include/4_telnet.h"
 #include "../include/include.h"
 
-struct udphdr *udp_analyzer(const u_char *packet, int verbose);
+struct udphdr *udp_analyzer(const u_char *packet, int length,
+                            int verbose);
 
 void get_protocol_udp(const u_char *packet, struct udphdr *udp_header,
                       int length, int verbose);
