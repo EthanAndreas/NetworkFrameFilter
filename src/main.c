@@ -160,6 +160,13 @@ int main(int argc, char **argv) {
             exit(1);
         }
 
+        PRV1(printf(GRN "No.\tLength\t\t"
+                        "Source\t\t\t\t\t\tDestination\t\t\t\t\tPort"
+                        "\t\t\tProtocol" NC "\n"),
+             verbose);
+
+        PRV2(printf(SIMPLE_BANNER "\n"), verbose);
+
         PRV3(printf(COLOR_BANNER "\n"), verbose);
 
         pcap_loop(handle, -1, got_packet, &usage->verbose);

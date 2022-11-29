@@ -12,6 +12,11 @@ void smtp_analyzer(const u_char *packet, int length, int verbose) {
 
     PRV1(printf("SMTP"), verbose);
 
+    PRV2(printf(CYN1 "SMTP" NC "\t\t"
+                     "Length : %d bits\n",
+                length),
+         verbose);
+
     PRV3(printf("\n" GRN "SMTP protocol" NC "\n"), verbose);
 
     int i = 0;

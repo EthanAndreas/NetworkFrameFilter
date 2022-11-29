@@ -20,26 +20,39 @@ void bootp_analyzer(const u_char *packet, int length, int verbose) {
     else
         PRV1(printf("Bootp"), verbose);
 
+    PRV2(printf(CYN1 "Bootp" NC "\t\t"), verbose);
+
     PRV3(printf("\n" GRN "Bootp protocol" NC "\n"), verbose);
 
     PRV3(printf("Message type : "), verbose);
-    if (bootp_header->bp_op == BOOTREQUEST)
+    if (bootp_header->bp_op == BOOTREQUEST) {
+        PRV2(printf("Request, "), verbose);
         PRV3(printf("Request"), verbose);
-    else if (bootp_header->bp_op == BOOTREPLY)
+    } else if (bootp_header->bp_op == BOOTREPLY) {
+        PRV2(printf("Reply, "), verbose);
         PRV3(printf("Reply"), verbose);
+    }
     PRV3(printf("\n"), verbose);
 
     if (bootp_header->bp_htype == HTYPE_ETHER)
         PRV3(printf("Hardware type : Ethernet\n"), verbose);
 
     PRV3(printf("Flags : "), verbose);
-    if (bootp_header->bp_flags == BOOTPUNICAST)
+    if (bootp_header->bp_flags == BOOTPUNICAST) {
+        PRV2(printf("Unicast, "), verbose);
         PRV3(printf("Unicast (0x%02x)", bootp_header->bp_flags),
              verbose);
-    else if (ntohs(bootp_header->bp_flags) & BOOTPBROADCAST)
+    } else if (ntohs(bootp_header->bp_flags) & BOOTPBROADCAST) {
+        PRV2(printf("Broadcast, "), verbose);
         PRV3(printf("Broadcast (0x%02x)", bootp_header->bp_flags),
              verbose);
+    }
     PRV3(printf("\n"), verbose);
+
+    PRV2(printf("Transaction ID : %02x:%02x:%02x:%02x\n",
+                bootp_header->bp_xid[0], bootp_header->bp_xid[1],
+                bootp_header->bp_xid[2], bootp_header->bp_xid[3]),
+         verbose);
 
     PRV3(printf("Transaction ID : %02x:%02x:%02x:%02x\n",
                 bootp_header->bp_xid[0], bootp_header->bp_xid[1],
@@ -163,6 +176,7 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
 
     if (bp_vend[0] == 0x63 && bp_vend[1] == 0x82 &&
         bp_vend[2] == 0x53 && bp_vend[3] == 0x63) {
+        PRV2(printf(RED "Dhcp" NC "\t\t"), verbose);
         PRV3(printf("\n" GRN "DHCP protocol" NC "\n"), verbose);
     }
 
@@ -511,37 +525,45 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             break;
         case TAG_DHCP_MESSAGE:
             PRV3(printf("DHCP message type : "), verbose);
-            // print the message type of dhcp
             for (j = 1; j <= bp_vend[i + 1]; j++) {
                 switch (bp_vend[i + 1 + j]) {
                 case DHCPDISCOVER:
+                    PRV2(printf("DHCPDISCOVER "), verbose);
                     PRV3(printf("Discover "), verbose);
                     break;
                 case DHCPOFFER:
+                    PRV2(printf("DHCPOFFER "), verbose);
                     PRV3(printf("Offer "), verbose);
                     break;
                 case DHCPREQUEST:
+                    PRV2(printf("DHCPREQUEST "), verbose);
                     PRV3(printf("Request "), verbose);
                     break;
                 case DHCPDECLINE:
+                    PRV2(printf("DHCPDECLINE "), verbose);
                     PRV3(printf("Decline "), verbose);
                     break;
                 case DHCPACK:
+                    PRV2(printf("DHCPACK "), verbose);
                     PRV3(printf("Ack "), verbose);
                     break;
                 case DHCPNAK:
+                    PRV2(printf("DHCPNAK "), verbose);
                     PRV3(printf("Nack "), verbose);
                     break;
                 case DHCPRELEASE:
+                    PRV2(printf("DHCPRELEASE "), verbose);
                     PRV3(printf("Release "), verbose);
                     break;
                 case DHCPINFORM:
+                    PRV2(printf("DHCPINFORM "), verbose);
                     PRV3(printf("Inform "), verbose);
                     break;
                 default:
                     break;
                 }
 
+                PRV2(printf("\n"), verbose);
                 PRV3(printf("\n"), verbose);
             }
 

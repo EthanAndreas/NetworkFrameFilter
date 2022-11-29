@@ -13,23 +13,32 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
 
     PRV1(printf("DNS"), verbose);
 
+    PRV2(printf(CYN1 "DNS" NC "\t\t"), verbose);
+
     PRV3(printf("\n" GRN "DNS Protocol" NC "\n"), verbose);
 
     struct dns_hdr *dns_header = (struct dns_hdr *)packet;
 
-    PRV3(printf("Transaction ID : 0x%0x\n", ntohs(dns_header->id)),
+    PRV3(printf("Transaction ID : 0x%0x\n"
+                "Flags : 0x%0x",
+                ntohs(dns_header->id), ntohs(dns_header->flags)),
          verbose);
 
-    PRV3(printf("Flags : 0x%0x", ntohs(dns_header->flags)), verbose);
     if (ntohs(dns_header->flags) & 0x8000) {
+        PRV2(printf("Response "), verbose);
         PRV3(printf(" (Response)\n"), verbose);
     } else {
+        PRV2(printf("Query "), verbose);
         PRV3(printf(" (Query)\n"), verbose);
     }
 
     int qdcount = ntohs(dns_header->qdcount),
         ancount = ntohs(dns_header->ancount),
         nscount = ntohs(dns_header->nscount);
+
+    PRV2(printf("(Nb qd : %d, Nb an : %d, Nb ns : %d)\n", qdcount,
+                ancount, nscount),
+         verbose);
 
     PRV3(printf("Questions : %d\n"
                 "Answer RRs : %d\n"

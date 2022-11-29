@@ -22,13 +22,11 @@ struct tcphdr *tcp_analyzer(const u_char *packet, int length,
     PRV2(printf(MAG "TCP" NC "\t\t"
                     "src port : %d, "
                     "dst port : %d, "
-                    "Flags : , ",
+                    "Flags : ",
                 ntohs(tcp_header->th_sport),
                 ntohs(tcp_header->th_dport)),
          verbose);
     tcp_flags(tcp_header->th_flags, verbose + 1);
-    PRV2(printf("Options : "), verbose);
-    tcp_options(packet, tcp_header->th_off, verbose + 1);
 
     // Multiple lines from the tcp header
     PRV3(printf("\n" GRN "TCP Header" NC "\n"
@@ -45,7 +43,7 @@ struct tcphdr *tcp_analyzer(const u_char *packet, int length,
          verbose);
     tcp_flags(tcp_header->th_flags, verbose);
 
-    PRV3(printf("\nWindow size : %d\n"
+    PRV3(printf("Window size : %d\n"
                 "Checksum : 0x%0x\n"
                 "Urgent pointer : %d\n"
                 "Options : ",
@@ -79,14 +77,11 @@ void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
 
     if (ntohs(tcp_header->th_dport) == HTTP_PORT ||
         ntohs(tcp_header->th_sport) == HTTP_PORT)
-        http_analyzer(packet, length, verbose);
+        http_analyzer(packet, HTTP_PORT, length, verbose);
 
     if (ntohs(tcp_header->th_dport) == HTTP2_PORT ||
-        ntohs(tcp_header->th_sport) == HTTP2_PORT) {
-        PRV2(printf("SSL\n"), verbose);
-        PRV3(printf("\n" GRN "Transport Layer Security" NC "\n"),
-             verbose);
-    }
+        ntohs(tcp_header->th_sport) == HTTP2_PORT)
+        http_analyzer(packet, HTTP2_PORT, length, verbose);
 
     if (ntohs(tcp_header->th_dport) == FTP_PORT ||
         ntohs(tcp_header->th_sport) == FTP_PORT)
@@ -156,6 +151,7 @@ void tcp_flags(uint8_t flags, int verbose) {
 
     if (nb_flags == 0)
         PRV3(printf("none"), verbose);
+    PRV3(printf("\n"), verbose);
 }
 
 /**

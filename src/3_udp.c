@@ -62,12 +62,11 @@ void get_protocol_udp(const u_char *packet, struct udphdr *udp_header,
 
     if (ntohs(udp_header->uh_dport) == HTTP_PORT ||
         ntohs(udp_header->uh_sport) == HTTP_PORT)
-        http_analyzer(packet, length, verbose);
+        http_analyzer(packet, HTTP_PORT, length, verbose);
 
     if (ntohs(udp_header->uh_dport) == HTTP2_PORT ||
         ntohs(udp_header->uh_sport) == HTTP2_PORT)
-        PRV1(printf("\n" GRN "Transport Layer Security" NC "\n"),
-             verbose);
+        http_analyzer(packet, HTTP2_PORT, length, verbose);
 
     if (ntohs(udp_header->uh_dport) == FTP_PORT ||
         ntohs(udp_header->uh_sport) == FTP_PORT)
