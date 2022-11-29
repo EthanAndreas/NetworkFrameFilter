@@ -25,27 +25,28 @@ struct iphdr *ip_analyzer(const u_char *packet, int verbose) {
         PRV1(printf(" "), verbose);
     PRV1(printf("\t\t\t\t\t"), verbose);
 
-    // all is printed
-    PRV3(printf("\n" GRN "IPv4 Header" NC "\n"), verbose);
-
-    PRV3(printf("IP source : %s\n",
+    PRV2(printf(YEL "IPv4" NC "\t\t"
+                    "IP src : %s, ",
                 inet_ntoa(*(struct in_addr *)&ip->saddr)),
          verbose);
-
-    PRV3(printf("IP destination : %s\n",
+    PRV2(printf("IP dst : %s, ",
                 inet_ntoa(*(struct in_addr *)&ip->daddr)),
          verbose);
 
-    PRV3(printf("Type of service : 0x%02x (%d)\n"
-                "Total length : %d\n"
-                "Time to live : %d\n",
-                ip->tos, ip->tos, ntohs(ip->tot_len), ip->ttl),
-         verbose);
+    PRV2(printf("Id : 0x%02x\n", ntohs(ip->id)), verbose);
 
-    PRV3(printf("Identification : 0x%02x (%d)\n"
+    // all is printed
+    PRV3(printf("\n" GRN "IPv4 Header" NC "\n"
+                "IP source : %s\n"
+                "IP destination : %s\n"
+                "Identification : 0x%02x (%d)\n"
+                "Type of service : 0x%02x (%d)\n"
+                "Total length : %d\n"
+                "Time to live : %d\n"
                 "Fragment offset : 0x%02x (%d)\n"
                 "Checksum : 0x%02x (%d)\n",
-                ntohs(ip->id), ntohs(ip->id), ip->frag_off,
+                src_ip, dst_ip, ntohs(ip->id), ntohs(ip->id), ip->tos,
+                ip->tos, ntohs(ip->tot_len), ip->ttl, ip->frag_off,
                 ip->frag_off, ntohs(ip->check), ntohs(ip->check)),
          verbose);
 

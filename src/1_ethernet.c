@@ -22,9 +22,20 @@ struct ether_header *ethernet_analyzer(const u_char *packet,
 
     struct ether_header *eth_header = (struct ether_header *)packet;
 
-    PRV3(printf(GRN "Ethernet Header" NC "\n"), verbose);
-
     char buf[18];
+
+    PRV2(printf(
+             GRN "Ethernet" NC "\tMac src : %s, ",
+             addr_mac_print(
+                 (struct ether_addr *)eth_header->ether_shost, buf)),
+         verbose);
+    PRV2(printf(
+             "Mac dst : %s\n",
+             addr_mac_print(
+                 (struct ether_addr *)eth_header->ether_dhost, buf)),
+         verbose);
+
+    PRV3(printf(GRN "Ethernet Header" NC "\n"), verbose);
 
     PRV3(printf(
              "Source MAC : %s\n",

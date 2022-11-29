@@ -510,37 +510,39 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             i += bp_vend[i + 1] + 1;
             break;
         case TAG_DHCP_MESSAGE:
-            PRV3(printf("DHCP message type :\n"), verbose);
+            PRV3(printf("DHCP message type : "), verbose);
             // print the message type of dhcp
             for (j = 1; j <= bp_vend[i + 1]; j++) {
                 switch (bp_vend[i + 1 + j]) {
                 case DHCPDISCOVER:
-                    PRV3(printf("\t -Discover\n"), verbose);
+                    PRV3(printf("Discover "), verbose);
                     break;
                 case DHCPOFFER:
-                    PRV3(printf("\t- Offer\n"), verbose);
+                    PRV3(printf("Offer "), verbose);
                     break;
                 case DHCPREQUEST:
-                    PRV3(printf("\t- Request\n"), verbose);
+                    PRV3(printf("Request "), verbose);
                     break;
                 case DHCPDECLINE:
-                    PRV3(printf("\t- Decline\n"), verbose);
+                    PRV3(printf("Decline "), verbose);
                     break;
                 case DHCPACK:
-                    PRV3(printf("\t- Ack\n"), verbose);
+                    PRV3(printf("Ack "), verbose);
                     break;
                 case DHCPNAK:
-                    PRV3(printf("\t- Nack\n"), verbose);
+                    PRV3(printf("Nack "), verbose);
                     break;
                 case DHCPRELEASE:
-                    PRV3(printf("\t- Release\n"), verbose);
+                    PRV3(printf("Release "), verbose);
                     break;
                 case DHCPINFORM:
-                    PRV3(printf("\t- Inform\n"), verbose);
+                    PRV3(printf("Inform "), verbose);
                     break;
                 default:
                     break;
                 }
+
+                PRV3(printf("\n"), verbose);
             }
 
             i += bp_vend[i + 1] + 1;
@@ -675,13 +677,13 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             PRV3(printf("Agent Information Option :\n"), verbose);
             switch (bp_vend[i + 2]) {
             case 1:
-                PRV3(printf("\t- Circuit ID : "), verbose);
+                PRV3(printf("- Circuit ID : "), verbose);
                 for (j = 0; j < bp_vend[i + 3]; j++)
                     PRV3(printf("%0x", bp_vend[i + 4 + j]), verbose);
                 PRV3(printf("\n"), verbose);
                 break;
             case 2:
-                PRV3(printf("\t- Remote ID : "), verbose);
+                PRV3(printf("- Remote ID : "), verbose);
                 for (j = 0; j < bp_vend[i + 3]; j++)
                     PRV3(printf("%0x", bp_vend[i + 4 + j]), verbose);
                 PRV3(printf("\n"), verbose);
@@ -710,19 +712,19 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             PRV3(printf("Authentication :\n"), verbose);
             switch (bp_vend[i + 2]) {
             case 1:
-                PRV3(printf("\t- Protocol : Delayed "
+                PRV3(printf("- Protocol : Delayed "
                             "authentification\n"),
                      verbose);
                 break;
             case 2:
-                PRV3(printf("\t- Protocol : Reconfigure key\n"),
+                PRV3(printf("- Protocol : Reconfigure key\n"),
                      verbose);
                 break;
             case 3:
-                PRV3(printf("\t- Protocol : HMAC-MD5\n"), verbose);
+                PRV3(printf("- Protocol : HMAC-MD5\n"), verbose);
                 break;
             case 4:
-                PRV3(printf("\t- Protocol : HMAC-SHA1\n"), verbose);
+                PRV3(printf("- Protocol : HMAC-SHA1\n"), verbose);
                 break;
             default:
                 break;
@@ -873,22 +875,22 @@ void parameter_request_list_print(const u_char *bp_vend, int start,
     for (i = start; i < length; i++) {
         switch (bp_vend[i]) {
         case TAG_SUBNET_MASK:
-            PRV3(printf("\t- Subnet mask\n"), verbose);
+            PRV3(printf("- Subnet mask\n"), verbose);
             break;
         case TAG_TIME_OFFSET:
-            PRV3(printf("\t- Time offset\n"), verbose);
+            PRV3(printf("- Time offset\n"), verbose);
             break;
         case TAG_GATEWAY:
-            PRV3(printf("\t- Router\n"), verbose);
+            PRV3(printf("- Router\n"), verbose);
             break;
         case TAG_TIME_SERVER:
-            PRV3(printf("\t- Time server\n"), verbose);
+            PRV3(printf("- Time server\n"), verbose);
             break;
         case TAG_NAME_SERVER:
             break;
-            PRV3(printf("\t- Name server\n"), verbose);
+            PRV3(printf("- Name server\n"), verbose);
         case TAG_DOMAIN_SERVER:
-            PRV3(printf("\t- Domain name\n"), verbose);
+            PRV3(printf("- Domain name\n"), verbose);
             break;
 
             // to complete ...

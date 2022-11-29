@@ -14,20 +14,27 @@ struct udphdr *udp_analyzer(const u_char *packet, int length,
                 ntohs(udp_header->uh_dport)),
          verbose);
 
-    if (length == sizeof(struct udphdr) ||
-        packet[sizeof(struct udphdr)] == 0)
+    if (length == sizeof(struct udphdr))
         PRV1(printf("UDP"), verbose);
 
-    PRV3(printf("\n" GRN "UDP Header" NC "\n"), verbose);
-
-    PRV3(printf("Source port : %d\n"
-                "Destination port : %d\n",
+    // One line from the udp header
+    PRV2(printf(MAG "UDP" NC "\t\t"
+                    "src port : %d, "
+                    "dst port : %d, "
+                    "Checksum : 0x%0x\n",
                 ntohs(udp_header->uh_sport),
-                ntohs(udp_header->uh_dport)),
+                ntohs(udp_header->uh_dport),
+                ntohs(udp_header->uh_sum)),
          verbose);
 
-    PRV3(printf("Length : %d\n"
+    // Multiple lines from the udp header
+    PRV3(printf("\n" GRN "UDP Header" NC "\n"
+                "Source port : %d\n"
+                "Destination port : %d\n"
+                "Length : %d\n"
                 "Checksum : 0x%02x (%d)\n",
+                ntohs(udp_header->uh_sport),
+                ntohs(udp_header->uh_dport),
                 ntohs(udp_header->uh_ulen), ntohs(udp_header->uh_sum),
                 ntohs(udp_header->uh_sum)),
          verbose);

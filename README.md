@@ -64,8 +64,8 @@ sudo ./bin/exe -i <interface> -v <verbosity> -f <filter>
 ## Verbosity
 
 Verbosity is a number between 1 and 3. <br />
-1 - Only essential informations (@Mac, @IP ...) and protocols' name <br />
-2 - Essential informations and their complements (Length of the packet, Time to live ...)<br />
+1 - Essential informations of the frame (one line by frame) <br />
+2 - Essential informations and their complements (one line by layer)<br />
 3 - All informations is printed<br />
 
 ## Filter
