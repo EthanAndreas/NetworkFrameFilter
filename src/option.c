@@ -40,32 +40,53 @@ int option(int argc, char **argv, usage_t *usage) {
             if (optopt == 'i') {
 
                 fprintf(stderr,
-                        "\nError"
-                        " : Option -%c requires an argument\n",
+                        RED "Error"
+                            " : Option -%c requires an argument" NC
+                            "\n",
                         optopt);
+                print_option();
                 exit(1);
             } else if (optopt == 'o') {
 
                 fprintf(stderr,
-                        "\nError"
-                        " : Option -%c requires an argument\n",
+                        RED "Error"
+                            " : Option -%c requires an argument" NC
+                            "\n",
                         optopt);
+                print_option();
                 exit(1);
             } else if (optopt == 'v') {
-
                 fprintf(stderr,
-                        "\nError"
-                        " : Option -%c requires an argument\n",
+                        RED "Error"
+                            " : Option -%c requires an argument" NC
+                            "\n",
                         optopt);
+                print_option();
                 exit(1);
-            } else
+            } else if (optopt == 'f') {
                 fprintf(stderr,
-                        "\nError"
-                        " : Unknown option character '%x'\n",
+                        RED "Error"
+                            " : Option -%c requires an argument" NC
+                            "\n",
                         optopt);
-
-            print_option();
-            exit(1);
+                print_option();
+                exit(1);
+            } else if (isprint(optopt)) {
+                fprintf(stderr,
+                        RED "Error"
+                            " : Unknown option -%c" NC "\n",
+                        optopt);
+                print_option();
+                exit(1);
+            } else {
+                fprintf(stderr,
+                        RED "Error"
+                            " : Unknown option character \\x%x" NC
+                            "\n",
+                        optopt);
+                print_option();
+                exit(1);
+            }
         }
     }
 
@@ -74,10 +95,9 @@ int option(int argc, char **argv, usage_t *usage) {
 
 void print_option(void) {
 
-    fprintf(stdout, "\n"
-                    "Options:\n"
-                    "\t-i FILE         interface\n"
-                    "\t-o FILE         output\n"
-                    "\t-f              filter\n"
-                    "\t-v              verbose of verbocity\n");
+    fprintf(stdout, "Options:\n"
+                    "\t-i <file>         interface\n"
+                    "\t-o <file>         output\n"
+                    "\t-f <nb>           filter\n"
+                    "\t-v <nb>           verbose of verbocity\n");
 }

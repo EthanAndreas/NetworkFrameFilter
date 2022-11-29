@@ -8,7 +8,7 @@
 #include "../include/include.h"
 #include "../include/option.h"
 
-int count = 0;
+volatile sig_atomic_t count = 0;
 
 /**
  * @brief Take the packet read by pcap_loop and print each header with
@@ -25,6 +25,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     int length = header->len;
 
     count++;
+    // One line by frame
     PRV1(printf("%d\t", count), verbose);
     PRV1(printf("%d\t\t", length), verbose);
 
@@ -153,20 +154,22 @@ int main(int argc, char **argv) {
     // Option chosen
     if (usage->interface != NULL) {
 
-        if ((handle = pcap_open_live(usage->interface, BUFSIZ, 1,
-                                     1000, errbuf)) == NULL) {
-
-            fprintf(stderr, "%s\n", errbuf);
+        if ((handle = pcap_open_live(usage->interface, BUFSIZ,
+                                     PROMISC, TO_MS, errbuf)) ==
+            NULL) {
+            fprintf(stderr, RED "%s" NC "\n", errbuf);
+            print_option();
             exit(1);
         }
 
-        PRV1(printf(GRN "No.\tLength\t\t"
+        // One line by frame
+        PRV1(printf(GRN "No.\tLength (bits)\t"
                         "Source\t\t\t\t\t\tDestination\t\t\t\t\tPort"
                         "\t\t\tProtocol" NC "\n"),
              verbose);
-
+        // One line by protocol
         PRV2(printf(SIMPLE_BANNER "\n"), verbose);
-
+        // Multiple lines by frame
         PRV3(printf(COLOR_BANNER "\n"), verbose);
 
         pcap_loop(handle, -1, got_packet, &usage->verbose);
@@ -175,24 +178,27 @@ int main(int argc, char **argv) {
 
         if ((handle = pcap_open_offline(usage->file, errbuf)) ==
             NULL) {
-            fprintf(stderr, "%s\n", errbuf);
+            fprintf(stderr, RED "%s" NC "\n", errbuf);
+            print_option();
             exit(1);
         }
 
-        PRV1(printf(GRN "No.\tLength\t\t"
+        // One line by frame
+        PRV1(printf(GRN "No.\tLength (bits)\t"
                         "Source\t\t\t\t\t\tDestination\t\t\t\t\tPort"
                         "\t\t\tProtocol" NC "\n"),
              verbose);
-
+        // One line by protocol
         PRV2(printf(SIMPLE_BANNER "\n"), verbose);
-
+        // Multiple lines by frame
         PRV3(printf(COLOR_BANNER "\n"), verbose);
 
         pcap_loop(handle, -1, got_packet, &usage->verbose);
 
     } else {
 
-        fprintf(stderr, "Error : No option chosen\n");
+        fprintf(stderr, RED "Error : No option picked" NC "\n");
+        print_option();
         exit(1);
     }
 

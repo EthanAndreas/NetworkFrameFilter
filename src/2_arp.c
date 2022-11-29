@@ -8,7 +8,7 @@ struct ether_arp *arp_analyzer(const u_char *packet, int verbose) {
     char *src_ip = inet_ntoa(*(struct in_addr *)&arp->arp_spa);
     char *dst_ip = inet_ntoa(*(struct in_addr *)&arp->arp_tpa);
 
-    // print mode for one line by frame
+    // One line by frame
     int k;
     for (k = 0; k < strlen(src_ip); k++)
         PRV1(printf("%c", src_ip[k]), verbose);
@@ -21,8 +21,10 @@ struct ether_arp *arp_analyzer(const u_char *packet, int verbose) {
         PRV1(printf(" "), verbose);
     PRV1(printf("\t\t\t\t\t"), verbose);
 
+    // One line from the arp header
     PRV2(printf(YEL "ARP" NC "\t\t"), verbose);
 
+    // Multiple lines from the arp header
     PRV3(printf("\n" GRN "ARP Header" NC "\n"), verbose);
 
     if (ntohs(arp->arp_hrd) == ARPHRD_ETHER) {

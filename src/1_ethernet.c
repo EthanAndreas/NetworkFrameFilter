@@ -24,6 +24,7 @@ struct ether_header *ethernet_analyzer(const u_char *packet,
 
     char buf[18];
 
+    // One line from the ethernet header
     PRV2(printf(
              GRN "Ethernet" NC "\tMac src : %s, ",
              addr_mac_print(
@@ -35,10 +36,10 @@ struct ether_header *ethernet_analyzer(const u_char *packet,
                  (struct ether_addr *)eth_header->ether_dhost, buf)),
          verbose);
 
-    PRV3(printf(GRN "Ethernet Header" NC "\n"), verbose);
-
+    // Multiple lines from the ethernet header
     PRV3(printf(
-             "Source MAC : %s\n",
+             GRN "Ethernet Header" NC "\n"
+                 "Source MAC : %s\n",
              addr_mac_print(
                  (struct ether_addr *)eth_header->ether_shost, buf)),
          verbose);

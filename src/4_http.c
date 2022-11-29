@@ -24,13 +24,16 @@ void http_analyzer(const u_char *packet, int port, int length,
     if (port != HTTP_PORT)
         return;
 
+    // One line by frame
     PRV1(printf("HTTP/1.1"), verbose);
 
+    // One line from the http packet
     PRV2(printf(CYN1 "HTTP/1.1" NC "\t\t"
                      "Length : %d bits\n",
                 length),
          verbose);
 
+    // Multiple lines from the http packet
     PRV3(printf("\n" GRN "HTTP/1.1" NC "\n"), verbose);
 
     int i;

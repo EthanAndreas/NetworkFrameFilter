@@ -12,7 +12,7 @@ struct iphdr *ip_analyzer(const u_char *packet, int verbose) {
     char *src_ip = inet_ntoa(*(struct in_addr *)&ip->saddr);
     char *dst_ip = inet_ntoa(*(struct in_addr *)&ip->daddr);
 
-    // print mode for one line by frame
+    // One line by frame
     int k;
     for (k = 0; k < strlen(src_ip); k++)
         PRV1(printf("%c", src_ip[k]), verbose);
@@ -25,6 +25,7 @@ struct iphdr *ip_analyzer(const u_char *packet, int verbose) {
         PRV1(printf(" "), verbose);
     PRV1(printf("\t\t\t\t\t"), verbose);
 
+    // One line from the ipv4 header
     PRV2(printf(YEL "IPv4" NC "\t\t"
                     "IP src : %s, ",
                 inet_ntoa(*(struct in_addr *)&ip->saddr)),
@@ -35,7 +36,7 @@ struct iphdr *ip_analyzer(const u_char *packet, int verbose) {
 
     PRV2(printf("Id : 0x%02x\n", ntohs(ip->id)), verbose);
 
-    // all is printed
+    // Multiple lines from the ipv4 header
     PRV3(printf("\n" GRN "IPv4 Header" NC "\n"
                 "IP source : %s\n"
                 "IP destination : %s\n"

@@ -16,12 +16,16 @@ void bootp_analyzer(const u_char *packet, int length, int verbose) {
         bootp_header->bp_vend[1] == 0x82 &&
         bootp_header->bp_vend[2] == 0x53 &&
         bootp_header->bp_vend[3] == 0x63)
+        // One line by frame
         PRV1(printf("DHCP"), verbose);
     else
+        // One line by frame
         PRV1(printf("Bootp"), verbose);
 
+    // One line from the bootp packet
     PRV2(printf(CYN1 "Bootp" NC "\t\t"), verbose);
 
+    // Multiple lines from the bootp packet
     PRV3(printf("\n" GRN "Bootp protocol" NC "\n"), verbose);
 
     PRV3(printf("Message type : "), verbose);
@@ -177,6 +181,7 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
     if (bp_vend[0] == 0x63 && bp_vend[1] == 0x82 &&
         bp_vend[2] == 0x53 && bp_vend[3] == 0x63) {
         PRV2(printf(RED "Dhcp" NC "\t\t"), verbose);
+        // Multiple lines from the dhcp header
         PRV3(printf("\n" GRN "DHCP protocol" NC "\n"), verbose);
     }
 

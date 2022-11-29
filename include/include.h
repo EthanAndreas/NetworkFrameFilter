@@ -11,9 +11,14 @@
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
 #include <pcap.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+// Parameters for pcap_open
+#define PROMISC 1
+#define TO_MS 1000
 
 // Application protocol
 #define DATA_FTP_PORT 20

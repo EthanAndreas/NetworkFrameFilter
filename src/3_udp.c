@@ -15,6 +15,7 @@ struct udphdr *udp_analyzer(const u_char *packet, int length,
          verbose);
 
     if (length == sizeof(struct udphdr))
+        // One line by frame
         PRV1(printf("UDP"), verbose);
 
     // One line from the udp header

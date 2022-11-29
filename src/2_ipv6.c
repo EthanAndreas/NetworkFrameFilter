@@ -31,17 +31,20 @@ struct ip6_hdr *ipv6_analyzer(const u_char *packet, int verbose) {
         }
     }
 
+    // One line by frame
     PRV1(printf("%s\t"
                 "%s\t",
                 src_ip, dst_ip),
          verbose);
 
+    // One line from the ipv6 header
     PRV2(printf(YEL "IPv6" NC "\t\t"
                     "IP src : %s, "
                     "IP dst : %s\n",
                 src_ip, dst_ip),
          verbose);
 
+    // Multiple lines from the ipv6 header
     PRV3(printf("\n" GRN "IPv6 Header" NC "\n"
                 "Source IP : %s\n"
                 "Destination IP : %s\n"

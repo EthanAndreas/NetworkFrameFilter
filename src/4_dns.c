@@ -11,15 +11,17 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
     if (length < 1)
         return;
 
-    PRV1(printf("DNS"), verbose);
-
-    PRV2(printf(CYN1 "DNS" NC "\t\t"), verbose);
-
-    PRV3(printf("\n" GRN "DNS Protocol" NC "\n"), verbose);
-
     struct dns_hdr *dns_header = (struct dns_hdr *)packet;
 
-    PRV3(printf("Transaction ID : 0x%0x\n"
+    // One line by frame
+    PRV1(printf("DNS"), verbose);
+
+    // One line from the dns packet
+    PRV2(printf(CYN1 "DNS" NC "\t\t"), verbose);
+
+    // Multiple lines from the dns packet
+    PRV3(printf("\n" GRN "DNS Protocol" NC "\n"
+                "Transaction ID : 0x%0x\n"
                 "Flags : 0x%0x",
                 ntohs(dns_header->id), ntohs(dns_header->flags)),
          verbose);

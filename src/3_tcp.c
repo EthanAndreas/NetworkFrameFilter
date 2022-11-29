@@ -16,6 +16,7 @@ struct tcphdr *tcp_analyzer(const u_char *packet, int length,
 
     if (length == tcp_header->th_off * 4 ||
         packet[tcp_header->th_off * 4] == 0)
+        // One line by frame
         PRV1(printf("TCP"), verbose);
 
     // One line from the tcp header
@@ -57,6 +58,7 @@ struct tcphdr *tcp_analyzer(const u_char *packet, int length,
 
 /**
  * @brief Get the protocol under TCP header
+ *
  */
 void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
                       int length, int verbose) {
