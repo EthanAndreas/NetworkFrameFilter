@@ -53,3 +53,32 @@ struct iphdr *ip_analyzer(const u_char *packet, int verbose) {
 
     return ip;
 }
+
+void get_protocol_ip(const u_char *packet, struct iphdr *ip_header,
+                     int length, int verbose) {
+
+    // TCP protocol
+    if (ip_header->protocol == IPPROTO_TCP) {
+
+        struct tcphdr *tcp_header =
+            tcp_analyzer(packet, length, verbose);
+        packet += tcp_header->th_off * 4;
+        length -= tcp_header->th_off * 4;
+
+        // Get the application layer protocol
+        get_protocol_tcp(packet, tcp_header, length, verbose);
+    }
+    // UDP protocol
+    else if (ip_header->protocol == IPPROTO_UDP) {
+
+        struct udphdr *udp_header =
+            udp_analyzer(packet, length, verbose);
+        packet += sizeof(struct udphdr);
+        length -= sizeof(struct udphdr);
+
+        // Get the application layer protocol
+        get_protocol_udp(packet, udp_header, length, verbose);
+
+    } else
+        PRV1(printf("-\t\t\t-"), verbose);
+}

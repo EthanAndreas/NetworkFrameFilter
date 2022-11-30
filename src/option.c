@@ -5,7 +5,7 @@ void init_usage(usage_t *usage) {
     usage->interface = NULL;
     usage->file = NULL;
     usage->filter = NULL;
-    usage->verbose = '3';
+    usage->verbose = "1";
 }
 
 int option(int argc, char **argv, usage_t *usage) {
@@ -21,7 +21,7 @@ int option(int argc, char **argv, usage_t *usage) {
             return 1;
 
         case 'v':
-            usage->verbose = optarg[0];
+            usage->verbose = optarg;
             break;
 
         case 'i':
@@ -45,7 +45,7 @@ int option(int argc, char **argv, usage_t *usage) {
                             "\n",
                         optopt);
                 print_option();
-                exit(1);
+                exit(EXIT_FAILURE);
             } else if (optopt == 'o') {
 
                 fprintf(stderr,
@@ -54,7 +54,7 @@ int option(int argc, char **argv, usage_t *usage) {
                             "\n",
                         optopt);
                 print_option();
-                exit(1);
+                exit(EXIT_FAILURE);
             } else if (optopt == 'v') {
                 fprintf(stderr,
                         RED "Error"
@@ -62,7 +62,7 @@ int option(int argc, char **argv, usage_t *usage) {
                             "\n",
                         optopt);
                 print_option();
-                exit(1);
+                exit(EXIT_FAILURE);
             } else if (optopt == 'f') {
                 fprintf(stderr,
                         RED "Error"
@@ -70,14 +70,14 @@ int option(int argc, char **argv, usage_t *usage) {
                             "\n",
                         optopt);
                 print_option();
-                exit(1);
+                exit(EXIT_FAILURE);
             } else if (isprint(optopt)) {
                 fprintf(stderr,
                         RED "Error"
                             " : Unknown option -%c" NC "\n",
                         optopt);
                 print_option();
-                exit(1);
+                exit(EXIT_FAILURE);
             } else {
                 fprintf(stderr,
                         RED "Error"
@@ -85,12 +85,12 @@ int option(int argc, char **argv, usage_t *usage) {
                             "\n",
                         optopt);
                 print_option();
-                exit(1);
+                exit(EXIT_FAILURE);
             }
         }
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void print_option(void) {

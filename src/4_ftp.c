@@ -21,4 +21,17 @@ void ftp_analyzer(const u_char *packet, int length, int verbose) {
 
     // Multiple lines from the ftp packet
     PRV3(printf("\n" GRN "FTP" NC "\n"), verbose);
+
+    int i;
+    for (i = 0; i < length; i++) {
+        if (i % BANNER_LENGTH == 0 && i != 0)
+            PRV3(printf("\n"), verbose);
+
+        if (isprint(packet[i]))
+            PRV3(printf("%c", packet[i]), verbose);
+        else
+            PRV3(printf("."), verbose);
+    }
+
+    PRV3(printf("\n"), verbose);
 }

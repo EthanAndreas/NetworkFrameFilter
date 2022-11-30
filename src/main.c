@@ -2,8 +2,6 @@
 #include "../include/2_arp.h"
 #include "../include/2_ip.h"
 #include "../include/2_ipv6.h"
-#include "../include/3_tcp.h"
-#include "../include/3_udp.h"
 
 #include "../include/include.h"
 #include "../include/option.h"
@@ -22,10 +20,11 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
                 const u_char *packet) {
 
     int verbose = (int)args[0] - 48;
-    int length = header->len;
+    // char *filter = (char *)args + 1;
 
-    count++;
     // One line by frame
+    int length = header->len;
+    count++;
     PRV1(printf("%d\t", count), verbose);
     PRV1(printf("%d\t\t", length), verbose);
 
@@ -38,88 +37,32 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     // Network Layer
     struct iphdr *ip_header;
     struct ip6_hdr *ipv6_header;
-    struct ether_arp *arp_header;
-
-    // Transport Layer
-    struct tcphdr *tcp_header;
-    struct udphdr *udp_header;
 
     // Get the network protocol
     switch (htons(eth_header->ether_type)) {
+
     // IPv4 protocol
     case ETHERTYPE_IP:
-
         ip_header = ip_analyzer(packet, verbose);
         packet += ip_header->ihl * 4;
         length -= ip_header->ihl * 4;
-
-        // TCP protocol
-        if (ip_header->protocol == IPPROTO_TCP) {
-
-            tcp_header = tcp_analyzer(packet, length, verbose);
-            packet += tcp_header->th_off * 4;
-            length -= tcp_header->th_off * 4;
-
-            // Get the application layer protocol
-            get_protocol_tcp(packet, tcp_header, length, verbose);
-        }
-
-        // UDP protocol
-        else if (ip_header->protocol == IPPROTO_UDP) {
-
-            udp_header = udp_analyzer(packet, length, verbose);
-            packet += sizeof(struct udphdr);
-            length -= sizeof(struct udphdr);
-
-            // Get the application layer protocol
-            get_protocol_udp(packet, udp_header, length, verbose);
-        }
-
-        else {
-            PRV1(printf("-\t\t\t-"), verbose);
-        }
-
+        // Get the transport layer protocol and the application layer
+        get_protocol_ip(packet, ip_header, length, verbose);
         break;
 
     // IPv6 protocol
     case ETHERTYPE_IPV6:
-
         ipv6_header = ipv6_analyzer(packet, verbose);
         packet += sizeof(struct ip6_hdr);
         length -= sizeof(struct ip6_hdr);
-
-        // TCP protocol
-        if (ipv6_header->ip6_nxt == IPPROTO_TCP) {
-
-            tcp_header = tcp_analyzer(packet, length, verbose);
-            packet += tcp_header->th_off * 4;
-            length -= tcp_header->th_off * 4;
-
-            get_protocol_tcp(packet, tcp_header, length, verbose);
-        }
-
-        // UDP protocol
-        else if (ipv6_header->ip6_nxt == IPPROTO_UDP) {
-
-            udp_header = udp_analyzer(packet, length, verbose);
-            packet += sizeof(struct udphdr);
-            length -= sizeof(struct udphdr);
-
-            // Get the application layer protocol
-            get_protocol_udp(packet, udp_header, length, verbose);
-        }
-
-        else {
-            PRV1(printf("-\t\t\t-"), verbose);
-        }
-
+        // Get the transport layer protocol and the application layer
+        get_protocol_ipv6(packet, ipv6_header, length, verbose);
         break;
 
     // ARP protocol
     case ETHERTYPE_ARP:
-        arp_header = arp_analyzer(packet, verbose);
+        arp_analyzer(packet, verbose);
         packet += sizeof(struct ether_arp);
-        (void)arp_header;
         PRV1(printf("-\t\t\t-"), verbose);
         break;
 
@@ -139,19 +82,40 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
  */
 int main(int argc, char **argv) {
 
+    // create usage structure
     usage_t *usage = malloc(sizeof(usage_t));
     init_usage(usage);
 
     // Check options
-    if (option(argc, argv, usage) == 1)
-        return 1;
+    option(argc, argv, usage);
 
-    int verbose = (int)(usage->verbose) - 48;
+    // Check verbose level
+    int verbose = atoi((const char *)usage->verbose);
+    if (verbose < 1 || verbose > 3) {
+        fprintf(stderr,
+                RED "Error : Verbose level must be 1,2 or 3" NC "\n");
+        print_option();
+        exit(EXIT_FAILURE);
+    }
 
     pcap_t *handle;
     char errbuf[PCAP_ERRBUF_SIZE];
 
-    // Option chosen
+    // Buffer containing the verbose level and the filter
+    char *buf;
+    if (usage->filter != NULL) {
+        buf = malloc(sizeof(char) * (strlen(usage->verbose) +
+                                     strlen(usage->filter) + 2));
+        snprintf(buf,
+                 strlen(usage->verbose) + strlen(usage->filter) + 2,
+                 "%s %s", usage->verbose, usage->filter);
+    } else {
+        buf = malloc(sizeof(char) * (strlen(usage->verbose) + 1));
+        snprintf(buf, strlen(usage->verbose) + 1, "%s",
+                 usage->verbose);
+    }
+
+    // Port listening
     if (usage->interface != NULL) {
 
         if ((handle = pcap_open_live(usage->interface, BUFSIZ,
@@ -159,7 +123,7 @@ int main(int argc, char **argv) {
             NULL) {
             fprintf(stderr, RED "%s" NC "\n", errbuf);
             print_option();
-            exit(1);
+            exit(EXIT_FAILURE);
         }
 
         // One line by frame
@@ -172,15 +136,17 @@ int main(int argc, char **argv) {
         // Multiple lines by frame
         PRV3(printf(COLOR_BANNER "\n"), verbose);
 
-        pcap_loop(handle, -1, got_packet, &usage->verbose);
+        pcap_loop(handle, -1, got_packet, (u_char *)buf);
 
-    } else if (usage->file != NULL) {
+    }
+    // File analyzing
+    else if (usage->file != NULL) {
 
         if ((handle = pcap_open_offline(usage->file, errbuf)) ==
             NULL) {
             fprintf(stderr, RED "%s" NC "\n", errbuf);
             print_option();
-            exit(1);
+            exit(EXIT_FAILURE);
         }
 
         // One line by frame
@@ -193,14 +159,14 @@ int main(int argc, char **argv) {
         // Multiple lines by frame
         PRV3(printf(COLOR_BANNER "\n"), verbose);
 
-        pcap_loop(handle, -1, got_packet, &usage->verbose);
+        pcap_loop(handle, -1, got_packet, (u_char *)buf);
 
     } else {
 
         fprintf(stderr, RED "Error : No option picked" NC "\n");
         print_option();
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
-    return 0;
+    exit(EXIT_SUCCESS);
 }

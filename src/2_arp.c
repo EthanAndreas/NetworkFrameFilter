@@ -1,6 +1,6 @@
 #include "../include/2_arp.h"
 
-struct ether_arp *arp_analyzer(const u_char *packet, int verbose) {
+void arp_analyzer(const u_char *packet, int verbose) {
 
     struct ether_arp *arp = (struct ether_arp *)packet;
     char buf[18];
@@ -85,6 +85,4 @@ struct ether_arp *arp_analyzer(const u_char *packet, int verbose) {
     PRV3(printf("Target IP address : %s\n",
                 inet_ntoa(*(struct in_addr *)arp->arp_tpa)),
          verbose);
-
-    return arp;
 }

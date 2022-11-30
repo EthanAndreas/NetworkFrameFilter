@@ -24,7 +24,14 @@ void smtp_analyzer(const u_char *packet, int length, int verbose) {
 
     int i = 0;
     while (packet[i] != 0x0d && packet[i] != 0x0a && i < length) {
-        PRV3(printf("%c", packet[i]), verbose);
+
+        if (i % BANNER_LENGTH == 0 && i != 0)
+            PRV3(printf("\n"), verbose);
+
+        if (isprint(packet[i]))
+            PRV3(printf("%c", packet[i]), verbose);
+        else
+            PRV3(printf("."), verbose);
         i++;
     }
     PRV3(printf("\n"), verbose);
