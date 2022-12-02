@@ -33,30 +33,30 @@ void telnet_analyzer(const u_char *packet, int length, int verbose) {
         if (i % BANNER_LENGTH == 0 && i != 0)
             PRV3(printf("\n"), verbose);
 
-        if (packet[i] == 0xff) {
+        if (i != length - 2 && packet[i] == 0xff &&
+            packet[i + 1] != 0xf0) {
             PRV3(printf("- "), verbose);
             telnet_cmd(packet[i + 1], verbose);
             telnet_opt(packet[i + 2], verbose);
             PRV3(printf("\n"), verbose);
-            i += 2;
-        } else {
-            if (isprint(packet[i]))
-                PRV3(printf("%c", packet[i]), verbose);
-            else
-                PRV3(printf("."), verbose);
+            i += 3;
         }
 
-        i++;
+        else {
+            if (isprint(packet[i]))
+                PRV3(printf("%c", packet[i]), verbose);
+            i++;
+        }
     }
     PRV3(printf("\n"), verbose);
 }
 
+/**
+ * @brief Print the telnet command
+ */
 void telnet_cmd(const u_char cmd, int verbose) {
 
     switch (cmd) {
-    case 0xf0:
-        PRV3(printf("SE"), verbose);
-        break;
     case 0xf1:
         PRV3(printf("NOP"), verbose);
         break;
@@ -105,6 +105,9 @@ void telnet_cmd(const u_char cmd, int verbose) {
     }
 }
 
+/**
+ * @brief Print the telnet option
+ */
 void telnet_opt(const u_char opt, int verbose) {
 
     switch (opt) {
