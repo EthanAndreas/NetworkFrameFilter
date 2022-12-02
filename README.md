@@ -49,6 +49,7 @@ sudo ./bin/exe -i <interface> -v <verbosity> -f <filter>
 
 - UDP
 - TCP
+- SCTP
 
 ### Application
 
@@ -60,6 +61,7 @@ sudo ./bin/exe -i <interface> -v <verbosity> -f <filter>
 - FTP
 - POP3
 - IMAP
+- Telnet
 
 ## Verbosity
 
@@ -70,7 +72,35 @@ Verbosity is a number between 1 and 3. <br />
 
 ## Filter
 
-in work
+Filter is a string you enter for chosing a type of packet on online listening. <br />
+The packet available are : <br />
+
+- arp
+- bootp
+- dhcp
+- dns
+- ftp
+- http
+- imap
+- pop3
+- smtp
+- telnet
+- tcp
+- udp
+
+To select transport layer, you have to enter the protocol name. <br />
+For example, if you want to see only the TCP packets, you have to enter : <br />
+
+```bash
+./bin/exe -i <interface> -f tcp
+```
+
+To select application protocol you need to input the port number. <br />
+For example, if you want to listen only the DNS packets, you can enter : <br />
+
+```bash
+./bin/exe -i <interface> -f "udp port 53"
+```
 
 ## Authors
 

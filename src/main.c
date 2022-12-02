@@ -2,7 +2,6 @@
 #include "../include/2_arp.h"
 #include "../include/2_ip.h"
 #include "../include/2_ipv6.h"
-
 #include "../include/include.h"
 #include "../include/option.h"
 
@@ -20,7 +19,6 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
                 const u_char *packet) {
 
     int verbose = (int)args[0] - 48;
-    // char *filter = (char *)args + 1;
 
     // One line by frame
     int length = header->len;
@@ -101,20 +99,6 @@ int main(int argc, char **argv) {
     pcap_t *handle;
     char errbuf[PCAP_ERRBUF_SIZE];
 
-    // Buffer containing the verbose level and the filter
-    char *buf;
-    if (usage->filter != NULL) {
-        buf = malloc(sizeof(char) * (strlen(usage->verbose) +
-                                     strlen(usage->filter) + 2));
-        snprintf(buf,
-                 strlen(usage->verbose) + strlen(usage->filter) + 2,
-                 "%s %s", usage->verbose, usage->filter);
-    } else {
-        buf = malloc(sizeof(char) * (strlen(usage->verbose) + 1));
-        snprintf(buf, strlen(usage->verbose) + 1, "%s",
-                 usage->verbose);
-    }
-
     // Port listening
     if (usage->interface != NULL) {
 
@@ -122,8 +106,23 @@ int main(int argc, char **argv) {
                                      PROMISC, TO_MS, errbuf)) ==
             NULL) {
             fprintf(stderr, RED "%s" NC "\n", errbuf);
-            print_option();
             exit(EXIT_FAILURE);
+        }
+
+        // Filter
+        if (usage->filter != NULL) {
+            struct bpf_program fp;
+            if (pcap_compile(handle, &fp, usage->filter, 0,
+                             PCAP_NETMASK_UNKNOWN) == -1) {
+                fprintf(stderr, RED "Error : %s" NC "\n",
+                        pcap_geterr(handle));
+                exit(EXIT_FAILURE);
+            }
+            if (pcap_setfilter(handle, &fp) == -1) {
+                fprintf(stderr, RED "Error : %s" NC "\n",
+                        pcap_geterr(handle));
+                exit(EXIT_FAILURE);
+            }
         }
 
         // One line by frame
@@ -136,7 +135,7 @@ int main(int argc, char **argv) {
         // Multiple lines by frame
         PRV3(printf(COLOR_BANNER "\n"), verbose);
 
-        pcap_loop(handle, -1, got_packet, (u_char *)buf);
+        pcap_loop(handle, -1, got_packet, (u_char *)usage->verbose);
 
     }
     // File analyzing
@@ -145,7 +144,6 @@ int main(int argc, char **argv) {
         if ((handle = pcap_open_offline(usage->file, errbuf)) ==
             NULL) {
             fprintf(stderr, RED "%s" NC "\n", errbuf);
-            print_option();
             exit(EXIT_FAILURE);
         }
 
@@ -159,7 +157,7 @@ int main(int argc, char **argv) {
         // Multiple lines by frame
         PRV3(printf(COLOR_BANNER "\n"), verbose);
 
-        pcap_loop(handle, -1, got_packet, (u_char *)buf);
+        pcap_loop(handle, -1, got_packet, (u_char *)usage->verbose);
 
     } else {
 

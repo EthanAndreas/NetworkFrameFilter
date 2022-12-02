@@ -38,7 +38,6 @@ int option(int argc, char **argv, usage_t *usage) {
 
         case '?':
             if (optopt == 'i') {
-
                 fprintf(stderr,
                         RED "Error"
                             " : Option -%c requires an argument" NC
@@ -47,7 +46,6 @@ int option(int argc, char **argv, usage_t *usage) {
                 print_option();
                 exit(EXIT_FAILURE);
             } else if (optopt == 'o') {
-
                 fprintf(stderr,
                         RED "Error"
                             " : Option -%c requires an argument" NC
@@ -81,12 +79,34 @@ int option(int argc, char **argv, usage_t *usage) {
             } else {
                 fprintf(stderr,
                         RED "Error"
-                            " : Unknown option character \\x%x" NC
-                            "\n",
-                        optopt);
+                            " : Unknown option character" NC "\n");
                 print_option();
                 exit(EXIT_FAILURE);
             }
+        }
+
+        if (usage->interface == NULL && usage->file == NULL) {
+            fprintf(stderr,
+                    RED "Error"
+                        " : Option -i or -o is required" NC "\n");
+            print_option();
+            exit(EXIT_FAILURE);
+        } else if (usage->interface != NULL && usage->file != NULL) {
+            fprintf(stderr,
+                    RED "Error"
+                        " : You must chose between online and "
+                        "offline listening" NC "\n");
+            print_option();
+            exit(EXIT_FAILURE);
+        } else if ((usage->filter != NULL &&
+                    usage->interface == NULL) ||
+                   (usage->filter != NULL && usage->file != NULL)) {
+            fprintf(stderr, RED
+                    "Error"
+                    " : Filter must be used on online listening" NC
+                    "\n");
+            print_option();
+            exit(EXIT_FAILURE);
         }
     }
 
