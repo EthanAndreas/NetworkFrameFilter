@@ -1,5 +1,8 @@
 bin/
 obj/
+html/
+Doxyfile
+styles/
 *.pdf
 *.png
 *.jpg

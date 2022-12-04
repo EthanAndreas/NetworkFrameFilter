@@ -61,17 +61,6 @@ struct bootp {
 #define HTYPE_ETHER 1
 
 /*
- * Vendor magic cookie (v_magic) for CMU
- */
-#define VM_CMU "CMU"
-
-/*
- * Vendor magic cookie (v_magic) for RFC1048
- */
-#define VM_RFC1048 \
-    { 99, 130, 83, 99 }
-
-/*
  * RFC1048 tag values used to specify what information is being
  * supplied in the vendor field of the packet.
  */
@@ -209,23 +198,5 @@ struct bootp {
 #define DHCPNAK 6
 #define DHCPRELEASE 7
 #define DHCPINFORM 8
-
-/*
- * "vendor" data permitted for CMU bootp clients.
- */
-
-struct cmu_vend {
-    u_int8_t v_magic[4];           /* magic number */
-    u_int32_t v_flags;             /* flags/opcodes, etc. */
-    struct in_addr v_smask;        /* Subnet mask */
-    struct in_addr v_dgate;        /* Default gateway */
-    struct in_addr v_dns1, v_dns2; /* Domain name servers */
-    struct in_addr v_ins1, v_ins2; /* IEN-116 name servers */
-    struct in_addr v_ts1, v_ts2;   /* Time servers */
-    u_int8_t v_unused[24];         /* currently unused */
-};
-
-/* v_flags values */
-#define VF_SMASK 1 /* Subnet mask field contains valid data */
 
 #endif
