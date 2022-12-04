@@ -9,3 +9,6 @@ void telnet_cmd(const u_char cmd, int verbose);
 void telnet_opt(const u_char opt, int verbose);
 
 #endif
+
+// Credits for option :
+// https://www.iana.org/assignments/telnet-options/telnet-options.xhtml
