@@ -1,6 +1,7 @@
 #ifndef IPV6
 #define IPV6
 
+#include "../include/3_sctp.h"
 #include "../include/3_tcp.h"
 #include "../include/3_udp.h"
 #include "../include/include.h"

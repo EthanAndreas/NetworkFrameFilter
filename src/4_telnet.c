@@ -31,8 +31,8 @@ void telnet_analyzer(const u_char *packet, int length, int verbose) {
     int i = 0, opt = 0;
     while (i < length) {
 
-        if (i != length - 2 && packet[i] == 0xff &&
-            packet[i + 1] != 0xf0) {
+        if (i != length - 2 && packet[i] == IAC &&
+            packet[i + 1] != SE) {
             PRV3(printf("- "), verbose);
             telnet_cmd(packet[i + 1], verbose);
             telnet_opt(packet[i + 2], verbose);
@@ -67,49 +67,49 @@ void telnet_analyzer(const u_char *packet, int length, int verbose) {
 void telnet_cmd(const u_char cmd, int verbose) {
 
     switch (cmd) {
-    case 0xf1:
+    case NOP:
         PRV3(printf("NOP"), verbose);
         break;
-    case 0xf2:
+    case DM:
         PRV3(printf("DM"), verbose);
         break;
-    case 0xf3:
+    case BRK:
         PRV3(printf("BRK"), verbose);
         break;
-    case 0xf4:
+    case IP:
         PRV3(printf("IP"), verbose);
         break;
-    case 0xf5:
+    case AO:
         PRV3(printf("AO"), verbose);
         break;
-    case 0xf6:
+    case AYT:
         PRV3(printf("AYT"), verbose);
         break;
-    case 0xf7:
+    case EC:
         PRV3(printf("EC"), verbose);
         break;
-    case 0xf8:
+    case EL:
         PRV3(printf("EL"), verbose);
         break;
-    case 0xf9:
+    case GA:
         PRV3(printf("GA"), verbose);
         break;
-    case 0xfa:
+    case SB:
         PRV3(printf("SB"), verbose);
         break;
-    case 0xfb:
+    case WILL:
         PRV3(printf("WILL"), verbose);
         break;
-    case 0xfc:
+    case WONT:
         PRV3(printf("WONT"), verbose);
         break;
-    case 0xfd:
+    case DO:
         PRV3(printf("DO"), verbose);
         break;
-    case 0xfe:
+    case DONT:
         PRV3(printf("DONT"), verbose);
         break;
-    case 0xff:
+    case IAC:
         PRV3(printf("IAC"), verbose);
         break;
     }
