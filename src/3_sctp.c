@@ -1,7 +1,9 @@
 #include "../include/3_sctp.h"
 
-struct sctp_hdr *sctp_analyzer(const u_char *packet, int length,
-                               int verbose) {
+/**
+ * @brief Analyze the sctp header
+ */
+void sctp_analyzer(const u_char *packet, int length, int verbose) {
 
     struct sctp_hdr *sctp_header = (struct sctp_hdr *)packet;
 
@@ -43,10 +45,11 @@ struct sctp_hdr *sctp_analyzer(const u_char *packet, int length,
     length -= sizeof(struct sctp_hdr);
     int nb_chunks = 0;
     sctp_chunk_analyzer(packet, nb_chunks, length, verbose);
-
-    return sctp_header;
 }
 
+/**
+ * @brief Analyze all sctp chunk
+ */
 void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
                          int length, int verbose) {
 
@@ -249,7 +252,3 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
     length -= sctp_chunk->length;
     sctp_chunk_analyzer(packet, nb_chunks, length, verbose);
 }
-
-void get_protocol_sctp(const u_char *packet,
-                       struct sctp_hdr *sctp_header, int length,
-                       int verbose) {}

@@ -76,7 +76,7 @@ void telnet_cmd(const u_char cmd, int verbose) {
     case BRK:
         PRV3(printf("BRK"), verbose);
         break;
-    case IP:
+    case IPRO:
         PRV3(printf("IP"), verbose);
         break;
     case AO:

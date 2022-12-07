@@ -79,16 +79,9 @@ void get_protocol_ip(const u_char *packet, struct iphdr *ip_header,
         // Get the application layer protocol
         get_protocol_udp(packet, udp_header, length, verbose);
 
-    } else if (ip_header->protocol == IPPROTO_SCTP) {
+    } else if (ip_header->protocol == IPPROTO_SCTP)
+        sctp_analyzer(packet, length, verbose);
 
-        struct sctp_hdr *sctp_header =
-            sctp_analyzer(packet, length, verbose);
-        packet += sizeof(struct sctp_hdr);
-        length -= sizeof(struct sctp_hdr);
-
-        // Get the application layer protocol
-        get_protocol_sctp(packet, sctp_header, length, verbose);
-
-    } else
+    else
         PRV1(printf("-\t\t\t-"), verbose);
 }

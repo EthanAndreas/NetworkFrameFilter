@@ -3,25 +3,11 @@
 /**
  * @brief Print informations contained in HTTP header
  */
-void http_analyzer(const u_char *packet, int port, int length,
-                   int verbose) {
+void http_analyzer(const u_char *packet, int length, int verbose) {
 
     // if there is no data left of a padding empty, it is just a
     // tcp/udp packet
     if (length < 1 || packet[0] == 0)
-        return;
-
-    if (port == HTTP2_PORT) {
-        PRV1(printf("HTTP/2 - SSL"), verbose);
-        PRV2(
-            printf(CYN1 "HTTP/2" NC "\t\tTransport Layer Security\n"),
-            verbose);
-        PRV3(printf(GRN "HTTP/2" NC "\nTransport Layer Security\n"),
-             verbose);
-        return;
-    }
-
-    if (port != HTTP_PORT)
         return;
 
     // One line by frame

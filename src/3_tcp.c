@@ -63,40 +63,53 @@ struct tcphdr *tcp_analyzer(const u_char *packet, int length,
 void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
                       int length, int verbose) {
 
-    if (ntohs(tcp_header->th_dport) == BOOTP_PORT ||
-        ntohs(tcp_header->th_sport) == BOOTP_PORT)
-        bootp_analyzer(packet, length, verbose);
-
+    // DNS
     if (ntohs(tcp_header->th_dport) == DNS_PORT ||
         ntohs(tcp_header->th_sport) == DNS_PORT)
         dns_analyzer(packet, length, verbose);
 
+    // SMTP
     if ((ntohs(tcp_header->th_dport) == SMTP_PORT ||
          ntohs(tcp_header->th_sport) == SMTP_PORT) &&
         (tcp_header->th_flags & TH_ACK) &&
         (tcp_header->th_flags & TH_PUSH))
         smtp_analyzer(packet, length, verbose);
 
+    // HTTP/1.1
     if (ntohs(tcp_header->th_dport) == HTTP_PORT ||
         ntohs(tcp_header->th_sport) == HTTP_PORT)
-        http_analyzer(packet, HTTP_PORT, length, verbose);
+        http_analyzer(packet, length, verbose);
 
-    if (ntohs(tcp_header->th_dport) == HTTP2_PORT ||
-        ntohs(tcp_header->th_sport) == HTTP2_PORT)
-        http_analyzer(packet, HTTP2_PORT, length, verbose);
+    // In the case of HTTPS (port 443), the packet is crypted
+    if (ntohs(tcp_header->th_dport) == HTTPS_PORT ||
+        ntohs(tcp_header->th_sport) == HTTPS_PORT) {
+        if (length >= 1) {
+            PRV1(printf("HTTPS"), verbose);
+            PRV2(printf(CYN1 "HTTPS" NC
+                             "\t\tTransport Layer Security\n"),
+                 verbose);
+            PRV3(
+                printf(GRN "HTTPS" NC "\nTransport Layer Security\n"),
+                verbose);
+        }
+    }
 
+    // FTP
     if (ntohs(tcp_header->th_dport) == FTP_PORT ||
         ntohs(tcp_header->th_sport) == FTP_PORT)
         ftp_analyzer(packet, length, verbose);
 
+    // POP3
     if (ntohs(tcp_header->th_dport) == POP3_PORT ||
         ntohs(tcp_header->th_sport) == POP3_PORT)
         pop3_analyzer(packet, length, verbose);
 
+    // IMAP
     if (ntohs(tcp_header->th_dport) == IMAP_PORT ||
         ntohs(tcp_header->th_sport) == IMAP_PORT)
         imap_analyzer(packet, length, verbose);
 
+    // TELNET
     if (ntohs(tcp_header->th_dport) == TELNET_PORT ||
         ntohs(tcp_header->th_sport) == TELNET_PORT)
         telnet_analyzer(packet, length, verbose);

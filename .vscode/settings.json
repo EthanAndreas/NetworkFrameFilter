@@ -12,7 +12,8 @@
         "udp.h": "c",
         "application_layer.h": "c",
         "stdlib.h": "c",
-        "ip6.h": "c"
+        "ip6.h": "c",
+        "3_sctp.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

@@ -8,7 +8,7 @@
 #define NOP 241
 #define DM 242
 #define BRK 243
-#define IP 244
+#define IPRO 244
 #define AO 245
 #define AYT 246
 #define EC 247

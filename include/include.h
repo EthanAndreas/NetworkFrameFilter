@@ -32,7 +32,7 @@
 #define HTTP_PORT 80
 #define POP3_PORT 110
 #define IMAP_PORT 143
-#define HTTP2_PORT 443
+#define HTTPS_PORT 443
 
 // Print with verbose level
 #define PRV1(op, v) \

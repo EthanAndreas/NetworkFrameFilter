@@ -55,14 +55,9 @@ struct sctp_chunk_sack {
     uint16_t num_dup_tsns;
 };
 
-struct sctp_hdr *sctp_analyzer(const u_char *packet, int length,
-                               int verbose);
+void sctp_analyzer(const u_char *packet, int length, int verbose);
 
 void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
                          int length, int verbose);
-
-void get_protocol_sctp(const u_char *packet,
-                       struct sctp_hdr *sctp_header, int length,
-                       int verbose);
 
 #endif
