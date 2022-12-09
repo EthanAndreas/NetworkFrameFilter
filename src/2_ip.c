@@ -78,10 +78,16 @@ void get_protocol_ip(const u_char *packet, struct iphdr *ip_header,
 
         // Get the application layer protocol
         get_protocol_udp(packet, udp_header, length, verbose);
+    }
 
-    } else if (ip_header->protocol == IPPROTO_SCTP)
+    // SCTP protocol
+    else if (ip_header->protocol == IPPROTO_SCTP)
         sctp_analyzer(packet, length, verbose);
 
+    // ICMP protocol
+    else if (ip_header->protocol == IPPROTO_ICMP)
+        icmp_analyzer(packet, length, verbose);
+
     else
-        PRV1(printf("-\t\t\t-"), verbose);
+        PRV1(printf("-\t\t\t" RED "Unrecognized" NC), verbose);
 }

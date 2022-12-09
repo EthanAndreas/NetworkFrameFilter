@@ -55,7 +55,10 @@ void get_protocol_udp(const u_char *packet, struct udphdr *udp_header,
         bootp_analyzer(packet, length, verbose);
 
     // DNS
-    if (ntohs(udp_header->uh_dport) == DNS_PORT ||
-        ntohs(udp_header->uh_sport) == DNS_PORT)
+    else if (ntohs(udp_header->uh_dport) == DNS_PORT ||
+             ntohs(udp_header->uh_sport) == DNS_PORT)
         dns_analyzer(packet, length, verbose);
+
+    else
+        PRV1(printf("UDP"), verbose);
 }

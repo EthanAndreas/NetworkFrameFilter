@@ -65,6 +65,9 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
         break;
 
     default:
+        PRV1(printf("-\t\t\t\t\t\t-\t\t\t\t\t\t-\t\t\t" RED
+                    "Unrecognized" NC),
+             verbose);
         break;
     }
 

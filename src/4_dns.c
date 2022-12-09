@@ -36,7 +36,8 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
 
     int qdcount = ntohs(dns_header->qdcount),
         ancount = ntohs(dns_header->ancount),
-        nscount = ntohs(dns_header->nscount);
+        nscount = ntohs(dns_header->nscount),
+        arcount = ntohs(dns_header->arcount);
 
     PRV2(printf("(Nb qd : %d, Nb an : %d, Nb ns : %d)\n", qdcount,
                 ancount, nscount),
@@ -44,8 +45,9 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
 
     PRV3(printf("Questions : %d\n"
                 "Answer RRs : %d\n"
-                "Authority RRs : %d\n",
-                qdcount, ancount, nscount),
+                "Authority RRs : %d\n"
+                "Additional RRs : %d\n",
+                qdcount, ancount, nscount, arcount),
          verbose);
 
     int i, offset = sizeof(struct dns_hdr);
@@ -59,13 +61,19 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
     for (i = 0; i < ancount; i++) {
 
         PRV3(printf(CYN1 "Answer %d" NC "\n", i + 1), verbose);
-        offset = answer_parsing(packet, offset, length, verbose);
+        offset = response_parsing(packet, offset, length, verbose);
     }
 
     for (i = 0; i < nscount; i++) {
 
         PRV3(printf(CYN1 "Authority %d" NC "\n", i + 1), verbose);
-        offset = authority_parsing(packet, offset, length, verbose);
+        offset = response_parsing(packet, offset, length, verbose);
+    }
+
+    for (i = 0; i < arcount; i++) {
+
+        PRV3(printf(CYN1 "Additional %d" NC "\n", i + 1), verbose);
+        offset = response_parsing(packet, offset, length, verbose);
     }
 }
 
@@ -90,41 +98,12 @@ int query_parsing(const u_char *packet, int offset, int length,
 }
 
 /**
- * @brief Print informations contained in DNS answer and return the
- * new offset after reading the answer
+ * @brief Print informations contained in DNS answer / authority /
+ * additional and return the new offset after reading the answer
  * @return int
  */
-int answer_parsing(const u_char *packet, int offset, int length,
-                   int verbose) {
-
-    PRV3(printf("- Name : "), verbose);
-    offset = domain_name_print(packet, offset, length, verbose);
-
-    uint16_t type = ntohs(*(uint16_t *)(packet + offset));
-    type_print(type, verbose);
-
-    uint16_t class = ntohs(*(uint16_t *)(packet + offset + 2));
-    class_print(class, verbose);
-
-    uint32_t ttl = ntohl(*(uint32_t *)(packet + offset + 4));
-    PRV3(printf("- TTL : %d\n", ttl), verbose);
-
-    uint16_t rdlength = ntohs(*(uint16_t *)(packet + offset + 8));
-    PRV3(printf("- RD Length : %d\n", rdlength), verbose);
-
-    data_reader(type, packet, offset + 10, offset + 10 + rdlength,
-                length, verbose);
-
-    return offset + 10 + rdlength;
-}
-
-/**
- * @brief Print informations contained in DNS authority and return the
- * new offset after reading the authority
- * @return int
- */
-int authority_parsing(const u_char *packet, int offset, int length,
-                      int verbose) {
+int response_parsing(const u_char *packet, int offset, int length,
+                     int verbose) {
 
     PRV3(printf("- Name : "), verbose);
     offset = domain_name_print(packet, offset, length, verbose);

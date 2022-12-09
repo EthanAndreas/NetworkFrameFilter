@@ -17,11 +17,8 @@ void dns_analyzer(const u_char *packet, int lenght, int verbose);
 
 int query_parsing(const u_char *packet, int offset, int length,
                   int verbose);
-int answer_parsing(const u_char *packet, int offset, int length,
-                   int verbose);
-int authority_parsing(const u_char *packet, int offset, int length,
-                      int verbose);
-
+int response_parsing(const u_char *packet, int offset, int length,
+                     int verbose);
 void data_reader(uint16_t type, const u_char *packet, int offset,
                  uint16_t rdlength, int length, int verbose);
 

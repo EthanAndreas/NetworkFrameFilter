@@ -47,7 +47,7 @@
     } while (0)
 #define PRV3(op, v) \
     do {            \
-        if (v == 3) \
+        if (v >= 3) \
             op;     \
     } while (0)
 
