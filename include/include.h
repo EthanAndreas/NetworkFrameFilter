@@ -4,7 +4,6 @@
 #include "../include/netinet_bootp.h"
 #include "../include/panic.h"
 #include <ctype.h>
-#include <errno.h>
 #include <getopt.h>
 #include <net/ethernet.h>
 #include <netinet/ether.h>
@@ -14,7 +13,6 @@
 #include <netinet/udp.h>
 #include <pcap.h>
 #include <signal.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

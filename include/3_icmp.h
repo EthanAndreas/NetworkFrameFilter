@@ -5,7 +5,7 @@
 #include "../include/include.h"
 
 // ICMP types
-#define ICMP_ECHOREPLY 0
+#define ICMP_ECHO_REPLY 0
 #define ICMP_DEST_UNREACH 3
 #define ICMP_SOURCE_QUENCH 4
 #define ICMP_REDIRECT 5
@@ -58,7 +58,6 @@ struct icmp_hdr {
     uint8_t type;
     uint8_t code;
     uint16_t checksum;
-    uint32_t data;
 };
 
 struct icmp_packet {

@@ -40,15 +40,18 @@ struct iphdr *ip_analyzer(const u_char *packet, int verbose) {
     PRV3(printf("\n" GRN "IPv4 Header" NC "\n"
                 "IP source : %s\n"
                 "IP destination : %s\n"
+                "IHL : %d\n"
                 "Identification : 0x%02x (%d)\n"
                 "Type of service : 0x%02x (%d)\n"
                 "Total length : %d\n"
                 "Time to live : %d\n"
                 "Fragment offset : 0x%02x (%d)\n"
+                "Protocol : %d\n"
                 "Checksum : 0x%02x (%d)\n",
-                src_ip, dst_ip, ntohs(ip->id), ntohs(ip->id), ip->tos,
-                ip->tos, ntohs(ip->tot_len), ip->ttl, ip->frag_off,
-                ip->frag_off, ntohs(ip->check), ntohs(ip->check)),
+                src_ip, dst_ip, ip->ihl, (ip->id), ntohs(ip->id),
+                ip->tos, ip->tos, ntohs(ip->tot_len), ip->ttl,
+                ip->frag_off, ip->frag_off, ip->protocol,
+                ntohs(ip->check), ntohs(ip->check)),
          verbose);
 
     return ip;
@@ -88,6 +91,24 @@ void get_protocol_ip(const u_char *packet, struct iphdr *ip_header,
     else if (ip_header->protocol == IPPROTO_ICMP)
         icmp_analyzer(packet, length, verbose);
 
+    // IPIP protocol
+    else if (ip_header->protocol == IPPROTO_IPIP) {
+
+        // avoid print twice ipv4 in verbose level 1
+        if (verbose == 1)
+            verbose = 0;
+
+        ip_header = ip_analyzer(packet, verbose);
+        packet += ip_header->ihl * 4;
+        length -= ip_header->ihl * 4;
+
+        // avoid print twice ipv4 in verbose level 1
+        if (verbose == 0)
+            verbose = 1;
+
+        get_protocol_ip(packet, ip_header, length, verbose);
+    }
+
     else
-        PRV1(printf("-\t\t\t" RED "Unrecognized" NC), verbose);
+        PRV1(printf("-\t\t\tIpv4" NC), verbose);
 }

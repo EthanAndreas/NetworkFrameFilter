@@ -14,7 +14,7 @@ void icmp_analyzer(const u_char *packet, int length, int verbose) {
     // ICMP type
     PRV3(printf("ICMP Type : "), verbose);
     switch (icmp_header->type) {
-    case ICMP_ECHOREPLY:
+    case ICMP_ECHO_REPLY:
         PRV2(printf("Echo Reply, "), verbose);
         PRV3(printf("Echo Reply\n"), verbose);
         break;
@@ -183,4 +183,42 @@ void icmp_analyzer(const u_char *packet, int length, int verbose) {
     PRV3(printf("ICMP Checksum : 0x%0x (%d)\n", icmp_header->checksum,
                 icmp_header->checksum),
          verbose);
+
+    // ICMP echo request/reply, info request/reply, address mask
+    // request/reply
+    if (icmp_header->type == ICMP_ECHO_REPLY ||
+        icmp_header->type == ICMP_INFO_REQUEST ||
+        icmp_header->type == ICMP_INFO_REPLY ||
+        icmp_header->type == ICMP_ADDRESS ||
+        icmp_header->type == ICMP_ADDRESS_REPLY) {
+
+        packet += sizeof(struct icmp_hdr);
+        // ICMP identifier
+        uint16_t id = ntohs(*(uint16_t *)packet);
+        // ICMP sequence number
+        uint16_t seq = ntohs(*(uint16_t *)(packet + 2));
+        PRV3(printf("ICMP Identifier : %d\n"
+                    "ICMP Sequence Number : %d\n",
+                    id, seq),
+             verbose);
+    }
+
+    // Error on IP packet
+    else if (icmp_header->type == ICMP_TIME_EXCEEDED ||
+             icmp_header->type == ICMP_DEST_UNREACH) {
+
+        packet += sizeof(struct icmp_hdr);
+
+        // IP packet failed
+        if (verbose == 1)
+            verbose = 0;
+
+        struct iphdr *ip_header = ip_analyzer(packet, verbose);
+        if (ip_header == NULL)
+            return;
+        packet += sizeof(struct iphdr);
+        length -= sizeof(struct iphdr);
+
+        get_protocol_ip(packet, ip_header, length, verbose);
+    }
 }
