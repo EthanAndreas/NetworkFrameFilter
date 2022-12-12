@@ -1,5 +1,7 @@
 #include "../include/3_tcp.h"
 
+volatile sig_atomic_t port_ftp = 0;
+
 /**
  * @brief Print informations contained in TCP header and return the
  * header in a structure
@@ -96,8 +98,14 @@ void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
 
     // FTP
     if (ntohs(tcp_header->th_dport) == FTP_PORT ||
-        ntohs(tcp_header->th_sport) == FTP_PORT)
-        ftp_analyzer(packet, length, verbose);
+        ntohs(tcp_header->th_sport) == FTP_PORT ||
+        ntohs(tcp_header->th_dport) == port_ftp ||
+        ntohs(tcp_header->th_sport) == port_ftp) {
+
+        int port_connection = ftp_analyzer(packet, length, verbose);
+        if (port_connection != 0)
+            port_ftp = port_connection;
+    }
 
     // POP3
     if (ntohs(tcp_header->th_dport) == POP3_PORT ||

@@ -20,7 +20,7 @@ void bootp_analyzer(const u_char *packet, int length, int verbose) {
         PRV1(printf("DHCP"), verbose);
     else
         // One line by frame
-        PRV1(printf("Bootp"), verbose);
+        PRV1(printf("BOOTP"), verbose);
 
     // One line from the bootp packet
     PRV2(printf(CYN1 "Bootp" NC "\t\t"), verbose);

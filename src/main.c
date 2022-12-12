@@ -5,6 +5,7 @@
 #include "../include/include.h"
 #include "../include/option.h"
 
+// frame number
 volatile sig_atomic_t count = 0;
 
 /**
@@ -61,13 +62,46 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
     case ETHERTYPE_ARP:
         arp_analyzer(packet, verbose);
         packet += sizeof(struct ether_arp);
-        PRV1(printf("-\t\t\t-"), verbose);
+        PRV1(printf("-\t\t\tARP"), verbose);
+        break;
+
+    // other cases
+    case ETHERTYPE_REVARP:
+        PRV1(add_mac_print_lvl1(eth_header), verbose);
+        PRV1(printf("-\t\t\tRARP"), verbose);
+        break;
+    case ETHERTYPE_PUP:
+        PRV1(add_mac_print_lvl1(eth_header), verbose);
+        PRV1(printf("-\t\t\tPUP"), verbose);
+        break;
+    case ETHERTYPE_SPRITE:
+        PRV1(add_mac_print_lvl1(eth_header), verbose);
+        PRV1(printf("-\t\t\tSPRITE"), verbose);
+        break;
+    case ETHERTYPE_AT:
+        PRV1(add_mac_print_lvl1(eth_header), verbose);
+        PRV1(printf("-\t\t\tAT"), verbose);
+        break;
+    case ETHERTYPE_AARP:
+        PRV1(add_mac_print_lvl1(eth_header), verbose);
+        PRV1(printf("-\t\t\tAARP"), verbose);
+        break;
+    case ETHERTYPE_VLAN:
+        PRV1(add_mac_print_lvl1(eth_header), verbose);
+        PRV1(printf("-\t\t\tVLAN"), verbose);
+        break;
+    case ETHERTYPE_IPX:
+        PRV1(add_mac_print_lvl1(eth_header), verbose);
+        PRV1(printf("-\t\t\tIPX"), verbose);
+        break;
+    case ETHERTYPE_LOOPBACK:
+        PRV1(add_mac_print_lvl1(eth_header), verbose);
+        PRV1(printf("-\t\t\tLOOPBACK"), verbose);
         break;
 
     default:
-        PRV1(printf("-\t\t\t\t\t\t-\t\t\t\t\t\t-\t\t\t" RED
-                    "Unrecognized" NC),
-             verbose);
+        PRV1(add_mac_print_lvl1(eth_header), verbose);
+        PRV1(printf("-\t\t\t" RED "Unknown" NC), verbose);
         break;
     }
 
@@ -105,27 +139,17 @@ int main(int argc, char **argv) {
     // Port listening
     if (usage->interface != NULL) {
 
-        if ((handle = pcap_open_live(usage->interface, BUFSIZ,
-                                     PROMISC, TO_MS, errbuf)) ==
-            NULL) {
-            fprintf(stderr, RED "%s" NC "\n", errbuf);
-            exit(EXIT_FAILURE);
-        }
+        // online mode
+        SCHK(handle = pcap_open_live(usage->interface, BUFSIZ,
+                                     PROMISC, TO_MS, errbuf));
 
         // Filter
         if (usage->filter != NULL) {
+
             struct bpf_program fp;
-            if (pcap_compile(handle, &fp, usage->filter, 0,
-                             PCAP_NETMASK_UNKNOWN) == -1) {
-                fprintf(stderr, RED "Error : %s" NC "\n",
-                        pcap_geterr(handle));
-                exit(EXIT_FAILURE);
-            }
-            if (pcap_setfilter(handle, &fp) == -1) {
-                fprintf(stderr, RED "Error : %s" NC "\n",
-                        pcap_geterr(handle));
-                exit(EXIT_FAILURE);
-            }
+            CHK(pcap_compile(handle, &fp, usage->filter, 0,
+                             PCAP_NETMASK_UNKNOWN));
+            CHK(pcap_setfilter(handle, &fp));
         }
 
         // One line by frame
@@ -138,17 +162,17 @@ int main(int argc, char **argv) {
         // Multiple lines by frame
         PRV3(printf(COLOR_BANNER "\n"), verbose);
 
+        // Capture packets
         pcap_loop(handle, -1, got_packet, (u_char *)usage->verbose);
 
+        // Free pcap handle
+        pcap_close(handle);
     }
     // File analyzing
     else if (usage->file != NULL) {
 
-        if ((handle = pcap_open_offline(usage->file, errbuf)) ==
-            NULL) {
-            fprintf(stderr, RED "%s" NC "\n", errbuf);
-            exit(EXIT_FAILURE);
-        }
+        // offline mode
+        SCHK(handle = pcap_open_offline(usage->file, errbuf));
 
         // One line by frame
         PRV1(printf(GRN "No.\tLength (bits)\t"
@@ -160,7 +184,11 @@ int main(int argc, char **argv) {
         // Multiple lines by frame
         PRV3(printf(COLOR_BANNER "\n"), verbose);
 
+        // Analyze packets
         pcap_loop(handle, -1, got_packet, (u_char *)usage->verbose);
+
+        // Free pcap handle
+        pcap_close(handle);
 
     } else {
 
@@ -168,6 +196,9 @@ int main(int argc, char **argv) {
         print_option();
         exit(EXIT_FAILURE);
     }
+
+    // free usage structure
+    free(usage);
 
     exit(EXIT_SUCCESS);
 }

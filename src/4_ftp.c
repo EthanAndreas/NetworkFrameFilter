@@ -3,12 +3,12 @@
 /**
  * @brief Print informations contained in FTP header
  */
-void ftp_analyzer(const u_char *packet, int length, int verbose) {
+int ftp_analyzer(const u_char *packet, int length, int verbose) {
 
     // if there is no data left of a padding empty, it is just a
     // tcp/udp packet
     if (length < 1 || packet[0] == 0)
-        return;
+        return -1;
 
     // One line by frame
     PRV1(printf("FTP"), verbose);
@@ -34,4 +34,17 @@ void ftp_analyzer(const u_char *packet, int length, int verbose) {
     }
 
     PRV3(printf("\n"), verbose);
+
+    // get the port delimited by ':' and ';'
+    char *port = strstr((char *)packet, ":");
+    if (port == NULL)
+        return -1;
+    port++;
+
+    char *end = strstr(port, ";");
+    if (end == NULL)
+        return -1;
+    *end = '\0';
+
+    return atoi(port);
 }

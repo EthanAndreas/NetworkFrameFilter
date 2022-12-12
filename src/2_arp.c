@@ -5,21 +5,23 @@ void arp_analyzer(const u_char *packet, int verbose) {
     struct ether_arp *arp = (struct ether_arp *)packet;
     char buf[18];
 
-    char *src_ip = inet_ntoa(*(struct in_addr *)&arp->arp_spa);
-    char *dst_ip = inet_ntoa(*(struct in_addr *)&arp->arp_tpa);
-
     // One line by frame
     int k;
-    for (k = 0; k < strlen(src_ip); k++)
-        PRV1(printf("%c", src_ip[k]), verbose);
-    for (k = strlen(src_ip); k < 15; k++)
-        PRV1(printf(" "), verbose);
-    PRV1(printf("\t\t\t\t\t"), verbose);
-    for (k = 0; k < strlen(dst_ip); k++)
-        PRV1(printf("%c", dst_ip[k]), verbose);
-    for (k = strlen(dst_ip); k < 15; k++)
-        PRV1(printf(" "), verbose);
-    PRV1(printf("\t\t\t\t\t"), verbose);
+    for (k = 0; k < 6; k++) {
+        sprintf(buf, "%02x", arp->arp_sha[k]);
+        PRV1(printf("%s", buf), verbose);
+        if (k < 5)
+            PRV1(printf(":"), verbose);
+    }
+    PRV1(printf("\t\t\t\t"), verbose);
+
+    for (k = 0; k < 6; k++) {
+        sprintf(buf, "%02x", arp->arp_tha[k]);
+        PRV1(printf("%s", buf), verbose);
+        if (k < 5)
+            PRV1(printf(":"), verbose);
+    }
+    PRV1(printf("\t\t\t\t"), verbose);
 
     // One line from the arp header
     PRV2(printf(YEL "ARP" NC "\t\t"), verbose);
