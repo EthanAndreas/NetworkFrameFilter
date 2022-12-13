@@ -68,31 +68,61 @@ void get_protocol_ipv6(const u_char *packet,
                        struct ip6_hdr *ipv6_header, int length,
                        int verbose) {
 
-    // TCP protocol
-    if (ipv6_header->ip6_nxt == IPPROTO_TCP) {
+    struct tcphdr *tcp_header;
+    struct udphdr *udp_header;
 
-        struct tcphdr *tcp_header =
-            tcp_analyzer(packet, length, verbose);
+    // TCP protocol
+    switch (ipv6_header->ip6_nxt) {
+    case IPPROTO_TCP:
+
+        tcp_header = tcp_analyzer(packet, length, verbose);
         packet += tcp_header->th_off * 4;
         length -= tcp_header->th_off * 4;
 
         get_protocol_tcp(packet, tcp_header, length, verbose);
+        break;
 
-    }
     // UDP protocol
-    else if (ipv6_header->ip6_nxt == IPPROTO_UDP) {
+    case IPPROTO_UDP:
 
-        struct udphdr *udp_header =
-            udp_analyzer(packet, length, verbose);
+        udp_header = udp_analyzer(packet, length, verbose);
         packet += sizeof(struct udphdr);
         length -= sizeof(struct udphdr);
 
         // Get the application layer protocol
         get_protocol_udp(packet, udp_header, length, verbose);
+        break;
 
-    } else if (ipv6_header->ip6_nxt == IPPROTO_SCTP)
+    // SCTP protocol
+    case IPPROTO_SCTP:
         sctp_analyzer(packet, length, verbose);
+        break;
 
-    else
+    // Other protocols
+    case IPPROTO_HOPOPTS:
+        PRV1(printf("HOPOPTS\t\t\t-"), verbose);
+        break;
+    case IPPROTO_ROUTING:
+        PRV1(printf("ROUTING\t\t\t-"), verbose);
+        break;
+    case IPPROTO_FRAGMENT:
+        PRV1(printf("FRAGMENT\t\t-"), verbose);
+        break;
+    case IPPROTO_ICMPV6:
+        PRV1(printf("ICMPV6\t\t\t-"), verbose);
+        break;
+    case IPPROTO_NONE:
+        PRV1(printf("IPv6\t\t\t-"), verbose);
+        break;
+    case IPPROTO_DSTOPTS:
+        PRV1(printf("DSTOPTS\t\t\t-"), verbose);
+        break;
+    case IPPROTO_MH:
+        PRV1(printf("MH\t\t\t-"), verbose);
+        break;
+
+    default:
         PRV1(printf("-\t\t\t-"), verbose);
+        break;
+    }
 }

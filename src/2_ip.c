@@ -60,40 +60,38 @@ struct iphdr *ip_analyzer(const u_char *packet, int verbose) {
 void get_protocol_ip(const u_char *packet, struct iphdr *ip_header,
                      int length, int verbose) {
 
-    // TCP protocol
-    if (ip_header->protocol == IPPROTO_TCP) {
+    struct tcphdr *tcp_header;
+    struct udphdr *udp_header;
 
-        struct tcphdr *tcp_header =
-            tcp_analyzer(packet, length, verbose);
+    switch (ip_header->protocol) {
+
+    // TCP protocol
+    case IPPROTO_TCP:
+        tcp_header = tcp_analyzer(packet, length, verbose);
         packet += tcp_header->th_off * 4;
         length -= tcp_header->th_off * 4;
 
         // Get the application layer protocol
         get_protocol_tcp(packet, tcp_header, length, verbose);
-    }
-    // UDP protocol
-    else if (ip_header->protocol == IPPROTO_UDP) {
+        break;
 
-        struct udphdr *udp_header =
-            udp_analyzer(packet, length, verbose);
+    // UDP protocol
+    case IPPROTO_UDP:
+        udp_header = udp_analyzer(packet, length, verbose);
         packet += sizeof(struct udphdr);
         length -= sizeof(struct udphdr);
 
         // Get the application layer protocol
         get_protocol_udp(packet, udp_header, length, verbose);
-    }
+        break;
 
     // SCTP protocol
-    else if (ip_header->protocol == IPPROTO_SCTP)
+    case IPPROTO_SCTP:
         sctp_analyzer(packet, length, verbose);
-
-    // ICMP protocol
-    else if (ip_header->protocol == IPPROTO_ICMP)
-        icmp_analyzer(packet, length, verbose);
+        break;
 
     // IPIP protocol
-    else if (ip_header->protocol == IPPROTO_IPIP) {
-
+    case IPPROTO_IPIP:
         // avoid print twice ipv4 in verbose level 1
         if (verbose == 1)
             verbose = 0;
@@ -107,8 +105,75 @@ void get_protocol_ip(const u_char *packet, struct iphdr *ip_header,
             verbose = 1;
 
         get_protocol_ip(packet, ip_header, length, verbose);
-    }
+        break;
 
-    else
+    // IPv6 protocol
+    case IPPROTO_IPV6:
+        ipv6_analyzer(packet, verbose);
+        break;
+
+    // ICMP protocol
+    case IPPROTO_ICMP:
+        icmp_analyzer(packet, length, verbose);
+        break;
+
+    // Other protocols
+    case IPPROTO_IGMP:
+        PRV1(printf("-\t\t\tIGMP"), verbose);
+        break;
+    case IPPROTO_EGP:
+        PRV1(printf("-\t\t\tEGP"), verbose);
+        break;
+    case IPPROTO_PUP:
+        PRV1(printf("-\t\t\tPUP"), verbose);
+        break;
+    case IPPROTO_IDP:
+        PRV1(printf("-\t\t\tIDP"), verbose);
+        break;
+    case IPPROTO_TP:
+        PRV1(printf("-\t\t\tTP"), verbose);
+        break;
+    case IPPROTO_DCCP:
+        PRV1(printf("-\t\t\tDCCP"), verbose);
+        break;
+    case IPPROTO_RSVP:
+        PRV1(printf("-\t\t\tRSVP"), verbose);
+        break;
+    case IPPROTO_GRE:
+        PRV1(printf("-\t\t\tGRE"), verbose);
+        break;
+    case IPPROTO_ESP:
+        PRV1(printf("-\t\t\tESP"), verbose);
+        break;
+    case IPPROTO_AH:
+        PRV1(printf("-\t\t\tAH"), verbose);
+        break;
+    case IPPROTO_MTP:
+        PRV1(printf("-\t\t\tMTP"), verbose);
+        break;
+    case IPPROTO_BEETPH:
+        PRV1(printf("-\t\t\tBEETPH"), verbose);
+        break;
+    case IPPROTO_ENCAP:
+        PRV1(printf("-\t\t\tENCAP"), verbose);
+        break;
+    case IPPROTO_PIM:
+        PRV1(printf("-\t\t\tPIM"), verbose);
+        break;
+    case IPPROTO_COMP:
+        PRV1(printf("-\t\t\tCOMP"), verbose);
+        break;
+    case IPPROTO_UDPLITE:
+        PRV1(printf("-\t\t\tUDPLITE"), verbose);
+        break;
+    case IPPROTO_MPLS:
+        PRV1(printf("-\t\t\tMPLS"), verbose);
+        break;
+    case IPPROTO_RAW:
+        PRV1(printf("-\t\t\tRAW"), verbose);
+        break;
+    default:
         PRV1(printf("-\t\t\tIpv4" NC), verbose);
+        break;
+    }
 }

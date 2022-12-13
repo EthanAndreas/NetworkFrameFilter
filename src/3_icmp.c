@@ -1,5 +1,8 @@
 #include "../include/3_icmp.h"
 
+/**
+ * @brief Print informations contained in ICMP header
+ */
 void icmp_analyzer(const u_char *packet, int length, int verbose) {
 
     // ICMP header
