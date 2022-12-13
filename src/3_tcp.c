@@ -1,5 +1,6 @@
 #include "../include/3_tcp.h"
 
+// global variable to store the port of the ftp connection
 volatile sig_atomic_t port_ftp = 0;
 
 /**
@@ -56,71 +57,6 @@ struct tcphdr *tcp_analyzer(const u_char *packet, int length,
     tcp_options(packet, tcp_header->th_off, verbose);
 
     return tcp_header;
-}
-
-/**
- * @brief Get the protocol under TCP header
- *
- */
-void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
-                      int length, int verbose) {
-
-    // DNS
-    if (ntohs(tcp_header->th_dport) == DNS_PORT ||
-        ntohs(tcp_header->th_sport) == DNS_PORT)
-        dns_analyzer(packet, length, verbose);
-
-    // SMTP
-    if ((ntohs(tcp_header->th_dport) == SMTP_PORT ||
-         ntohs(tcp_header->th_sport) == SMTP_PORT) &&
-        (tcp_header->th_flags & TH_ACK) &&
-        (tcp_header->th_flags & TH_PUSH))
-        smtp_analyzer(packet, length, verbose);
-
-    // HTTP/1.1
-    if (ntohs(tcp_header->th_dport) == HTTP_PORT ||
-        ntohs(tcp_header->th_sport) == HTTP_PORT)
-        http_analyzer(packet, length, verbose);
-
-    // In the case of HTTPS (port 443), the packet is crypted
-    if (ntohs(tcp_header->th_dport) == HTTPS_PORT ||
-        ntohs(tcp_header->th_sport) == HTTPS_PORT) {
-        if (length >= 1) {
-            PRV1(printf("HTTPS"), verbose);
-            PRV2(printf(CYN1 "HTTPS" NC
-                             "\t\tTransport Layer Security\n"),
-                 verbose);
-            PRV3(
-                printf(GRN "HTTPS" NC "\nTransport Layer Security\n"),
-                verbose);
-        }
-    }
-
-    // FTP
-    if (ntohs(tcp_header->th_dport) == FTP_PORT ||
-        ntohs(tcp_header->th_sport) == FTP_PORT ||
-        ntohs(tcp_header->th_dport) == port_ftp ||
-        ntohs(tcp_header->th_sport) == port_ftp) {
-
-        int port_connection = ftp_analyzer(packet, length, verbose);
-        if (port_connection != 0)
-            port_ftp = port_connection;
-    }
-
-    // POP3
-    if (ntohs(tcp_header->th_dport) == POP3_PORT ||
-        ntohs(tcp_header->th_sport) == POP3_PORT)
-        pop3_analyzer(packet, length, verbose);
-
-    // IMAP
-    if (ntohs(tcp_header->th_dport) == IMAP_PORT ||
-        ntohs(tcp_header->th_sport) == IMAP_PORT)
-        imap_analyzer(packet, length, verbose);
-
-    // TELNET
-    if (ntohs(tcp_header->th_dport) == TELNET_PORT ||
-        ntohs(tcp_header->th_sport) == TELNET_PORT)
-        telnet_analyzer(packet, length, verbose);
 }
 
 /**
@@ -239,4 +175,72 @@ void tcp_options(const u_char *packet, uint8_t offset, int verbose) {
         PRV3(printf("None\n"), verbose);
     else
         PRV3(printf("\n"), verbose);
+}
+
+/**
+ * @brief Get the protocol under TCP header
+ *
+ */
+void get_protocol_tcp(const u_char *packet, struct tcphdr *tcp_header,
+                      int length, int verbose) {
+
+    // DNS
+    if (ntohs(tcp_header->th_dport) == DNS_PORT ||
+        ntohs(tcp_header->th_sport) == DNS_PORT)
+        dns_analyzer(packet, DNS_TCP, length, verbose);
+
+    // SMTP
+    if ((ntohs(tcp_header->th_dport) == SMTP_PORT ||
+         ntohs(tcp_header->th_sport) == SMTP_PORT) &&
+        (tcp_header->th_flags & TH_ACK) &&
+        (tcp_header->th_flags & TH_PUSH))
+        smtp_analyzer(packet, length, verbose);
+
+    // HTTP/1.1
+    if (ntohs(tcp_header->th_dport) == HTTP_PORT ||
+        ntohs(tcp_header->th_sport) == HTTP_PORT)
+        http_analyzer(packet, length, verbose);
+
+    // In the case of HTTPS (port 443), the packet is crypted
+    if (ntohs(tcp_header->th_dport) == HTTPS_PORT ||
+        ntohs(tcp_header->th_sport) == HTTPS_PORT) {
+        if (length >= 1) {
+            PRV1(printf("HTTPS"), verbose);
+            PRV2(printf(CYN1 "HTTPS" NC
+                             "\t\tTransport Layer Security\n"),
+                 verbose);
+            PRV3(
+                printf(GRN "HTTPS" NC "\nTransport Layer Security\n"),
+                verbose);
+        }
+    }
+
+    // FTP
+    if (ntohs(tcp_header->th_dport) == FTP_PORT ||
+        ntohs(tcp_header->th_sport) == FTP_PORT ||
+        ntohs(tcp_header->th_dport) == DATA_FTP_PORT ||
+        ntohs(tcp_header->th_sport) == DATA_FTP_PORT ||
+        (ntohs(tcp_header->th_dport) == port_ftp && port_ftp != 0) ||
+        (ntohs(tcp_header->th_sport) == port_ftp && port_ftp != 0)) {
+
+        // if a new port is established, we save it
+        int connection_ftp = ftp_analyzer(packet, length, verbose);
+        if (connection_ftp != 0)
+            port_ftp = connection_ftp;
+    }
+
+    // POP3
+    if (ntohs(tcp_header->th_dport) == POP3_PORT ||
+        ntohs(tcp_header->th_sport) == POP3_PORT)
+        pop3_analyzer(packet, length, verbose);
+
+    // IMAP
+    if (ntohs(tcp_header->th_dport) == IMAP_PORT ||
+        ntohs(tcp_header->th_sport) == IMAP_PORT)
+        imap_analyzer(packet, length, verbose);
+
+    // TELNET
+    if (ntohs(tcp_header->th_dport) == TELNET_PORT ||
+        ntohs(tcp_header->th_sport) == TELNET_PORT)
+        telnet_analyzer(packet, length, verbose);
 }

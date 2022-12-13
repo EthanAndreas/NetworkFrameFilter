@@ -55,7 +55,7 @@ void smtp_analyzer(const u_char *packet, int length, int verbose) {
             PRV3(printf("\n"), verbose);
         }
 
-        if (isprint(packet[i]))
+        if (i < length && isprint(packet[i]))
             PRV3(printf("%c", packet[i]), verbose);
         else {
             if (i < length - 1)
@@ -65,5 +65,4 @@ void smtp_analyzer(const u_char *packet, int length, int verbose) {
         i++;
         j++;
     }
-    PRV3(printf("\n"), verbose);
 }

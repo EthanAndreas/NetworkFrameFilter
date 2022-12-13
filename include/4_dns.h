@@ -4,6 +4,9 @@
 #include "../include/include.h"
 #include <string.h>
 
+#define DNS_TCP 0
+#define DNS_UDP 1
+
 struct dns_hdr {
     u_int16_t id;
     u_int16_t flags;
@@ -13,7 +16,8 @@ struct dns_hdr {
     u_int16_t arcount;
 };
 
-void dns_analyzer(const u_char *packet, int lenght, int verbose);
+void dns_analyzer(const u_char *packet, int transport, int lenght,
+                  int verbose);
 
 int query_parsing(const u_char *packet, int offset, int length,
                   int verbose);

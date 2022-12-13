@@ -50,6 +50,7 @@ sudo ./bin/exe -i <interface> -v <verbosity> -f <filter>
 - UDP
 - TCP
 - SCTP
+- ICMP
 
 ### Application
 

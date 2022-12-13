@@ -4,12 +4,23 @@
  * @brief Print informations contained in DNS header and print
  * queries, answers and authorities which can be found in the packet
  */
-void dns_analyzer(const u_char *packet, int length, int verbose) {
+void dns_analyzer(const u_char *packet, int transport, int length,
+                  int verbose) {
 
     // if there is no data left of a padding empty, it is just a
     // tcp/udp packet
-    if (length < 1)
+    if (length < sizeof(struct dns_hdr) + 2)
         return;
+
+    int dns_length;
+
+    // there is a length field in the DNS header only if the packet is
+    // under TCP
+    if (transport == DNS_TCP) {
+
+        dns_length = ntohs(*(uint16_t *)packet);
+        packet += 2;
+    }
 
     struct dns_hdr *dns_header = (struct dns_hdr *)packet;
 
@@ -20,17 +31,21 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
     PRV2(printf(CYN1 "DNS" NC "\t\t"), verbose);
 
     // Multiple lines from the dns packet
-    PRV3(printf("\n" GRN "DNS Protocol" NC "\n"
-                "Transaction ID : 0x%0x\n"
+    PRV3(printf("\n" GRN "DNS Protocol" NC "\n"), verbose);
+
+    if (transport == DNS_TCP)
+        PRV3(printf("Length : %d\n", dns_length), verbose);
+
+    PRV3(printf("Transaction ID : 0x%0x\n"
                 "Flags : 0x%0x",
                 ntohs(dns_header->id), ntohs(dns_header->flags)),
          verbose);
 
     if (ntohs(dns_header->flags) & 0x8000) {
-        PRV2(printf("Response "), verbose);
+        PRV2(printf("Standard query response "), verbose);
         PRV3(printf(" (Response)\n"), verbose);
     } else {
-        PRV2(printf("Query "), verbose);
+        PRV2(printf("Standard query "), verbose);
         PRV3(printf(" (Query)\n"), verbose);
     }
 
@@ -39,8 +54,10 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
         nscount = ntohs(dns_header->nscount),
         arcount = ntohs(dns_header->arcount);
 
-    PRV2(printf("(Nb qd : %d, Nb an : %d, Nb ns : %d)\n", qdcount,
-                ancount, nscount),
+    PRV2(printf(
+             "(Questions : %d, Answer RRs : %d, Authority RRs : %d, "
+             "Additional RRs : %d)\n",
+             qdcount, ancount, nscount, arcount),
          verbose);
 
     PRV3(printf("Questions : %d\n"
@@ -85,6 +102,9 @@ void dns_analyzer(const u_char *packet, int length, int verbose) {
 int query_parsing(const u_char *packet, int offset, int length,
                   int verbose) {
 
+    if (offset + 4 >= length)
+        return offset;
+
     PRV3(printf("- Name : "), verbose);
     offset = domain_name_print(packet, offset, length, verbose);
 
@@ -104,6 +124,9 @@ int query_parsing(const u_char *packet, int offset, int length,
  */
 int response_parsing(const u_char *packet, int offset, int length,
                      int verbose) {
+
+    if (offset + 10 >= length)
+        return offset;
 
     PRV3(printf("- Name : "), verbose);
     offset = domain_name_print(packet, offset, length, verbose);
@@ -140,6 +163,8 @@ void data_reader(uint16_t type, const u_char *packet, int i,
 
     case 1:
         PRV3(printf("- IPv4 Address : "), verbose);
+        if (i + 4 > length)
+            return;
         for (j = 0; j < 4; j++) {
             PRV3(printf("%d", packet[i + j]), verbose);
             if (j != 3)
@@ -165,6 +190,9 @@ void data_reader(uint16_t type, const u_char *packet, int i,
         PRV3(printf("- Responsible Authority's Mailbox : "), verbose);
         i = name_print(packet, i, length, verbose);
 
+        if (i + 20 > length)
+            return;
+
         uint32_t serial_nb = ntohl(*(uint32_t *)(packet + i));
         PRV3(printf("- Serial Number : %d\n", serial_nb), verbose);
 
@@ -188,11 +216,19 @@ void data_reader(uint16_t type, const u_char *packet, int i,
 
     case 15:
         PRV3(printf("- Mail Exchange : "), verbose);
+
+        if (i + 2 > length)
+            return;
+
         domain_name_print(packet, i + 2, length, verbose);
         break;
 
     case 16:
         PRV3(printf("- Text : "), verbose);
+
+        if (i + 1 + packet[i] > length)
+            return;
+
         for (j = 0; j < packet[i]; j++) {
             PRV3(printf("%c", packet[i + j + 1]), verbose);
         }
@@ -201,6 +237,10 @@ void data_reader(uint16_t type, const u_char *packet, int i,
 
     case 28:
         PRV3(printf("- IPv6 Address : "), verbose);
+
+        if (i + 16 > length)
+            return;
+
         for (j = 0; j < 16; j++) {
             PRV3(printf("%x", packet[i + j]), verbose);
             if (j != 15) {
@@ -223,7 +263,7 @@ int domain_name_print(const u_char *packet, int i, int length,
                       int verbose) {
 
     int j, start = i;
-    while (packet[i] != 0 && i < length) {
+    while (i <= length && packet[i] != 0) {
 
         if (packet[i] == 0xc0) {
             if (i != start)
@@ -311,6 +351,9 @@ void type_print(u_int16_t type, int verbose) {
         break;
     case 251:
         PRV3(printf("IXFR (Incremental Zone Transfer)\n"), verbose);
+        break;
+    case 252:
+        PRV3(printf("AXFR (Zone Transfer)\n"), verbose);
         break;
     default:
         PRV3(printf("Unknown\n"), verbose);

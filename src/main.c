@@ -20,9 +20,9 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
                 const u_char *packet) {
 
     int verbose = (int)args[0] - 48;
+    int length = header->len;
 
     // One line by frame
-    int length = header->len;
     count++;
     PRV1(printf("%d\t", count), verbose);
     PRV1(printf("%d\t\t", length), verbose);

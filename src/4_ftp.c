@@ -8,7 +8,7 @@ int ftp_analyzer(const u_char *packet, int length, int verbose) {
     // if there is no data left of a padding empty, it is just a
     // tcp/udp packet
     if (length < 1 || packet[0] == 0)
-        return -1;
+        return 0;
 
     // One line by frame
     PRV1(printf("FTP"), verbose);
@@ -35,16 +35,29 @@ int ftp_analyzer(const u_char *packet, int length, int verbose) {
 
     PRV3(printf("\n"), verbose);
 
-    // get the port delimited by ':' and ';'
-    char *port = strstr((char *)packet, ":");
-    if (port == NULL)
-        return -1;
-    port++;
+    char port_ftp[6];
+    int j = 0;
+    // if the message begins by "150 Data connection ..." there is a
+    // reattribute of the port
+    if (length > 40 && packet[0] == '1' && packet[1] == '5' &&
+        packet[2] == '0' && packet[3] == ' ' && packet[4] == 'D' &&
+        packet[5] == 'a' && packet[6] == 't' && packet[7] == 'a') {
 
-    char *end = strstr(port, ";");
-    if (end == NULL)
-        return -1;
-    *end = '\0';
+        i = 8;
+        while (i < length && packet[i] != ':')
+            i++;
 
-    return atoi(port);
+        i++;
+        while (i < length && packet[i] != ';') {
+            port_ftp[j] = packet[i];
+            i++;
+            j++;
+        }
+
+        port_ftp[j] = '\0';
+
+        return atoi(port_ftp);
+    }
+
+    return 0;
 }
