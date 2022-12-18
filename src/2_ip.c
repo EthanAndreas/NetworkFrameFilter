@@ -173,7 +173,7 @@ void get_protocol_ip(const u_char *packet, struct iphdr *ip_header,
         PRV1(printf("-\t\t\tRAW"), verbose);
         break;
     default:
-        PRV1(printf("-\t\t\tIpv4" NC), verbose);
+        PRV1(printf("-\t\t\tIpv4"), verbose);
         break;
     }
 }

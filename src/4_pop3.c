@@ -7,8 +7,10 @@ void pop3_analyzer(const u_char *packet, int length, int verbose) {
 
     // if there is no data left of a padding empty, it is just a
     // tcp/udp packet
-    if (length < 1 || packet[0] == 0)
+    if (length < 1 || packet[0] == 0) {
+        PRV1(printf("TCP"), verbose);
         return;
+    }
 
     // One line by frame
     PRV1(printf("POP3"), verbose);

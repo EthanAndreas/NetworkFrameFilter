@@ -122,7 +122,7 @@ void get_protocol_ipv6(const u_char *packet,
         break;
 
     default:
-        PRV1(printf("-\t\t\t-"), verbose);
+        PRV1(printf("-\t\t\tIPv6"), verbose);
         break;
     }
 }

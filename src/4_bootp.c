@@ -7,8 +7,10 @@ void bootp_analyzer(const u_char *packet, int length, int verbose) {
 
     // if there is no data left of a padding empty, it is just a
     // tcp/udp packet
-    if (length < 1 || packet[0] == 0)
+    if (length < 1 || packet[0] == 0) {
+        PRV1(printf("UDP"), verbose);
         return;
+    }
 
     struct bootp *bootp_header = (struct bootp *)packet;
 

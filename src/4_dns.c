@@ -9,8 +9,13 @@ void dns_analyzer(const u_char *packet, int transport, int length,
 
     // if there is no data left of a padding empty, it is just a
     // tcp/udp packet
-    if (length < sizeof(struct dns_hdr) + 2)
+    if (length < sizeof(struct dns_hdr) + 2) {
+        if (transport == DNS_TCP)
+            PRV1(printf("TCP"), verbose);
+        if (transport == DNS_UDP)
+            PRV1(printf("UDP"), verbose);
         return;
+    }
 
     int dns_length;
 

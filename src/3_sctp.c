@@ -11,10 +11,8 @@ void sctp_analyzer(const u_char *packet, int length, int verbose) {
                 ntohs(sctp_header->dst_port)),
          verbose);
 
-    if (length == sizeof(struct sctp_hdr) ||
-        packet[sizeof(struct sctp_hdr)] == 0)
-        // One line by frame
-        PRV1(printf("SCTP"), verbose);
+    // One line by frame
+    PRV1(printf("SCTP"), verbose);
 
     // One line from the sctp header
     PRV2(printf(MAG "SCTP" NC "\t\t"

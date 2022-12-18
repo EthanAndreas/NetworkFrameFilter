@@ -14,10 +14,6 @@ struct udphdr *udp_analyzer(const u_char *packet, int length,
                 ntohs(udp_header->uh_dport)),
          verbose);
 
-    if (length == sizeof(struct udphdr))
-        // One line by frame
-        PRV1(printf("UDP"), verbose);
-
     // One line from the udp header
     PRV2(printf(MAG "UDP" NC "\t\t"
                     "src port : %d, "
