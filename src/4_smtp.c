@@ -17,7 +17,7 @@ void smtp_analyzer(const u_char *packet, int length, int verbose) {
 
     // One line from the smtp packet
     PRV2(printf(CYN1 "SMTP" NC "\t\t"
-                     "Length : %d bits, ",
+                     "Length : %d bits",
                 length),
          verbose);
 
@@ -26,15 +26,20 @@ void smtp_analyzer(const u_char *packet, int length, int verbose) {
         code = (packet[0] - 48) * 100 + (packet[1] - 48) * 10 +
                (packet[2] - 48);
 
-    if (code < 0 || code > 999) {
-        if ((packet[0] == 0x0d && packet[1] == 0x0a) ||
-            packet[0] == '\n') {
-            PRV2(printf("Response : "), verbose);
-            for (i = 0; i < length; i++)
-                PRV2(printf("%c", packet[i]), verbose);
-        }
+    if (length > 3) {
+
+        if (code < 0 || code > 999) {
+            if ((packet[0] == 0x0d && packet[1] == 0x0a) ||
+                packet[0] == '\n') {
+                PRV2(printf(", Response : "), verbose);
+                for (i = 0; i < length; i++)
+                    PRV2(printf("%c", packet[i]), verbose);
+            }
+            PRV2(printf("\n"), verbose);
+        } else
+            PRV2(printf(", Code : %d\n", code), verbose);
     } else
-        PRV2(printf("Code : %d\n", code), verbose);
+        PRV2(printf("\n"), verbose);
 
     // Multiple lines from the smtp packet
     PRV3(printf("\n" GRN "SMTP protocol" NC "\n"), verbose);

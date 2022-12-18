@@ -71,7 +71,7 @@ Verbosity is a number between 1 and 3. <br />
 2 - Essential informations and their complements (one line by layer)<br />
 3 - All informations is printed<br />
 
-## Filter
+## Filtering
 
 Filter is a string you enter for chosing a type of packet on online listening. <br />
 The packet available are : <br />
@@ -103,13 +103,32 @@ For example, if you want to listen only the DNS packets, you can enter : <br />
 ./bin/exe -i <interface> -f "udp port 53"
 ```
 
-### Filter in the shell
+### Filtering in the shell
 
 ```bash
 ./bin/exe -o <interface> | grep <protocol> -C NUM
 
 <protocol> correspond to the name print in the shell (for example : "Ethernet")
 NUM is the number of lines you want to print around the protocol name 
+```
+
+### Documentation
+
+You can create the documentation with the following command : <br />
+
+```bash
+make docs
+```
+
+The documentation is available in the repertory "styles". <br />
+
+### Tests
+
+There is a bash script to test the possible error of the program with valgrind. <br />
+The test is on the offline mode with all the assets given. <br />
+
+```bash
+make tests
 ```
 
 ## Authors

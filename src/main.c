@@ -126,9 +126,9 @@ int main(int argc, char **argv) {
 
     // Check verbose level
     int verbose = atoi((const char *)usage->verbose);
-    if (verbose < 1 || verbose > 3) {
-        fprintf(stderr,
-                RED "Error : Verbose level must be 1,2 or 3" NC "\n");
+    if (verbose < 0 || verbose > 3) {
+        fprintf(stderr, RED "Error : Verbose level must be 1,2,3 or "
+                            "0 to launch without display" NC "\n");
         print_option();
         exit(EXIT_FAILURE);
     }

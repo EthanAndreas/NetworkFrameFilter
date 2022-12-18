@@ -94,14 +94,14 @@ void get_protocol_ip(const u_char *packet, struct iphdr *ip_header,
     case IPPROTO_IPIP:
         // avoid print twice ipv4 in verbose level 1
         if (verbose == 1)
-            verbose = 0;
+            verbose = -1;
 
         ip_header = ip_analyzer(packet, verbose);
         packet += ip_header->ihl * 4;
         length -= ip_header->ihl * 4;
 
         // avoid print twice ipv4 in verbose level 1
-        if (verbose == 0)
+        if (verbose == -1)
             verbose = 1;
 
         get_protocol_ip(packet, ip_header, length, verbose);

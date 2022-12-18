@@ -535,42 +535,40 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
             for (j = 1; j <= bp_vend[i + 1]; j++) {
                 switch (bp_vend[i + 1 + j]) {
                 case DHCPDISCOVER:
-                    PRV2(printf("DHCPDISCOVER "), verbose);
+                    PRV2(printf("Discover, "), verbose);
                     PRV3(printf("Discover "), verbose);
                     break;
                 case DHCPOFFER:
-                    PRV2(printf("DHCPOFFER "), verbose);
+                    PRV2(printf("Offer, "), verbose);
                     PRV3(printf("Offer "), verbose);
                     break;
                 case DHCPREQUEST:
-                    PRV2(printf("DHCPREQUEST "), verbose);
+                    PRV2(printf("Request, "), verbose);
                     PRV3(printf("Request "), verbose);
                     break;
                 case DHCPDECLINE:
-                    PRV2(printf("DHCPDECLINE "), verbose);
+                    PRV2(printf("Decline, "), verbose);
                     PRV3(printf("Decline "), verbose);
                     break;
                 case DHCPACK:
-                    PRV2(printf("DHCPACK "), verbose);
+                    PRV2(printf("Ack, "), verbose);
                     PRV3(printf("Ack "), verbose);
                     break;
                 case DHCPNAK:
-                    PRV2(printf("DHCPNAK "), verbose);
+                    PRV2(printf("Nack, "), verbose);
                     PRV3(printf("Nack "), verbose);
                     break;
                 case DHCPRELEASE:
-                    PRV2(printf("DHCPRELEASE "), verbose);
+                    PRV2(printf("Release, "), verbose);
                     PRV3(printf("Release "), verbose);
                     break;
                 case DHCPINFORM:
-                    PRV2(printf("DHCPINFORM "), verbose);
+                    PRV2(printf("Inform, "), verbose);
                     PRV3(printf("Inform "), verbose);
                     break;
                 default:
                     break;
                 }
-
-                PRV2(printf("\n"), verbose);
                 PRV3(printf("\n"), verbose);
             }
 
@@ -895,6 +893,8 @@ void bootp_vendor_specific(const u_char *bp_vend, int length,
         }
         i++;
     }
+
+    PRV2(printf("Length : %d bits\n", length), verbose);
 }
 
 void parameter_request_list_print(const u_char *bp_vend, int start,

@@ -28,6 +28,14 @@ $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
 	mkdir -p $(OBJDIR)
 	$(CC) -o $@ -c $< $(CFLAGS) $(INCLUDE_PATH)
 
+.PHONY : tests
+tests:
+	@echo "\033[92mCompilation...\033[0m"
+	make
+	@echo "\033[95mRunning tests...\033[0m"
+	@./valgrind_tests.sh
+	@echo "\033[95mTests ended\033[0m"
+
 .PHONY: clean
 clean:
 	rm -rf obj/*.o

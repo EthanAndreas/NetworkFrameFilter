@@ -16,7 +16,7 @@ void http_analyzer(const u_char *packet, int length, int verbose) {
     PRV1(printf("HTTP/1.1"), verbose);
 
     // One line from the http packet
-    PRV2(printf(CYN1 "HTTP/1.1" NC "\t\t"
+    PRV2(printf(CYN1 "HTTP/1.1" NC "\t"
                      "Length : %d bits\n",
                 length),
          verbose);

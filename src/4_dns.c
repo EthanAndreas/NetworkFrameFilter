@@ -277,6 +277,16 @@ int domain_name_print(const u_char *packet, int i, int length,
             return i + 2;
         }
 
+        // "c1" represent a position in the packet for additional
+        // response
+        if (packet[i] == 0xc1) {
+            int nameserver = packet[i + 1] / 18;
+            PRV3(printf("Authority name server n°%d\n",
+                        nameserver + 2),
+                 verbose);
+            return i + 2;
+        }
+
         if (packet[i] != 0 && i != start)
             PRV3(printf("."), verbose);
 

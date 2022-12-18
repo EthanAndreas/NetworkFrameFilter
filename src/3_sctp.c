@@ -60,26 +60,26 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
         (struct sctp_chunk_hdr *)packet;
 
     // Multiple lines from the sctp chunk header
-    PRV3(printf("Chunk n°%d :\n"
-                "- Type : ",
+    PRV3(printf("\n" CYN1 "Chunk n°%d" NC "\n"
+                "Type : ",
                 nb_chunks),
          verbose);
 
     switch (sctp_chunk->type) {
     case DATA:
         PRV3(printf("Payload data (%d)\n"
-                    "- Flags : 0x%0x\n"
-                    "- Length : %d\n",
+                    "Flags : 0x%02x\n"
+                    "Length : %d bits\n",
                     sctp_chunk->type, sctp_chunk->flags,
                     ntohs(sctp_chunk->length)),
              verbose);
         packet += sizeof(struct sctp_chunk_hdr);
         struct sctp_chunk_data *sctp_data =
             (struct sctp_chunk_data *)packet;
-        PRV3(printf("- TSN : %d\n"
-                    "- Stream ID : %d\n"
-                    "- Stream sequence number : %d\n"
-                    "- Payload protocol identifier : %d\n",
+        PRV3(printf("TSN : %d\n"
+                    "Stream ID : %d\n"
+                    "Stream sequence number : %d\n"
+                    "Payload protocol identifier : %d\n",
                     ntohl(sctp_data->tsn),
                     ntohs(sctp_data->stream_id),
                     ntohs(sctp_data->stream_seq),
@@ -92,11 +92,11 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
         packet += sizeof(struct sctp_chunk_hdr);
         struct sctp_chunk_init *sctp_init =
             (struct sctp_chunk_init *)packet;
-        PRV3(printf("\t- Initiate tag : %d\n"
-                    "\t- Advertised receiver window credit : %d\n"
-                    "\t- Number of outbound streams : %d\n"
-                    "\t- Number of inbound streams : %d\n"
-                    "\t- Initial TSN : %d\n",
+        PRV3(printf("Initiate tag : %d\n"
+                    "Advertised receiver window credit : %d\n"
+                    "Number of outbound streams : %d\n"
+                    "Number of inbound streams : %d\n"
+                    "Initial TSN : %d\n",
                     ntohl(sctp_init->init_tag),
                     ntohl(sctp_init->a_rwnd),
                     ntohs(sctp_init->out_streams),
@@ -112,11 +112,11 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
         packet += sizeof(struct sctp_chunk_hdr);
         struct sctp_chunk_init *sctp_init_ack =
             (struct sctp_chunk_init *)packet;
-        PRV3(printf("\t- Initiate tag : %d\n"
-                    "\t- Advertised receiver window credit : %d\n"
-                    "\t- Number of outbound streams : %d\n"
-                    "\t- Number of inbound streams : %d\n"
-                    "\t- Initial TSN : %d\n",
+        PRV3(printf("Initiate tag : %d\n"
+                    "Advertised receiver window credit : %d\n"
+                    "Number of outbound streams : %d\n"
+                    "Number of inbound streams : %d\n"
+                    "Initial TSN : %d\n",
                     ntohl(sctp_init_ack->init_tag),
                     ntohl(sctp_init_ack->a_rwnd),
                     ntohs(sctp_init_ack->out_streams),
@@ -132,10 +132,10 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
         packet += sizeof(struct sctp_chunk_hdr);
         struct sctp_chunk_sack *sctp_sack =
             (struct sctp_chunk_sack *)packet;
-        PRV3(printf("\t- Cumulative TSN acknowledgement : %d\n"
-                    "\t- Advertised receiver window credit : %d\n"
-                    "\t- Number of gap ack blocks : %d\n"
-                    "\t- Number of duplicate TSNs : %d\n",
+        PRV3(printf("Cumulative TSN acknowledgement : %d\n"
+                    "Advertised receiver window credit : %d\n"
+                    "Number of gap ack blocks : %d\n"
+                    "Number of duplicate TSNs : %d\n",
                     ntohl(sctp_sack->cum_tsn_ack),
                     ntohl(sctp_sack->a_rwnd),
                     sctp_sack->num_gap_ack_blocks,
@@ -148,7 +148,7 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
              verbose);
         packet += sizeof(struct sctp_chunk_hdr);
         uint32_t heartbeat_info = *(uint32_t *)packet;
-        PRV3(printf("\t- Heartbeat information : %d\n",
+        PRV3(printf("Heartbeat information : %d\n",
                     ntohl(heartbeat_info)),
              verbose);
         break;
@@ -159,7 +159,7 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
              verbose);
         packet += sizeof(struct sctp_chunk_hdr);
         uint32_t heartbeat_ack_info = *(uint32_t *)packet;
-        PRV3(printf("\t- Heartbeat information : %d\n",
+        PRV3(printf("Heartbeat information : %d\n",
                     ntohl(heartbeat_ack_info)),
              verbose);
         break;
@@ -168,14 +168,14 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
         PRV3(printf("Abort (%d)\n", sctp_chunk->type), verbose);
         packet += sizeof(struct sctp_chunk_hdr);
         uint32_t abort = *(uint32_t *)packet;
-        PRV3(printf("\t- Error cause : %d\n", ntohl(abort)), verbose);
+        PRV3(printf("Error cause : %d\n", ntohl(abort)), verbose);
         break;
 
     case SHUTDOWN:
         PRV3(printf("Shutdown (%d)\n", sctp_chunk->type), verbose);
         packet += sizeof(struct sctp_chunk_hdr);
         uint32_t sctp_shutdown = *(uint32_t *)packet;
-        PRV3(printf("\t- Cumulative TSN acknowledgement : %d\n",
+        PRV3(printf("Cumulative TSN acknowledgement : %d\n",
                     ntohl(sctp_shutdown)),
              verbose);
         break;
@@ -186,7 +186,7 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
              verbose);
         packet += sizeof(struct sctp_chunk_hdr);
         uint32_t sctp_shutdown_ack = *(uint32_t *)packet;
-        PRV3(printf("\t- Cumulative TSN acknowledgement : %d\n",
+        PRV3(printf("Cumulative TSN acknowledgement : %d\n",
                     ntohl(sctp_shutdown_ack)),
              verbose);
         break;
@@ -196,7 +196,7 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
              verbose);
         packet += sizeof(struct sctp_chunk_hdr);
         uint32_t error_cause = *(uint32_t *)packet;
-        PRV3(printf("\t- Error cause : %d\n", ntohl(error_cause)),
+        PRV3(printf("Error cause : %d\n", ntohl(error_cause)),
              verbose);
         break;
 
@@ -205,7 +205,7 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
              verbose);
         packet += sizeof(struct sctp_chunk_hdr);
         uint32_t cookie = *(uint32_t *)packet;
-        PRV3(printf("\t- Cookie : %d\n", ntohl(cookie)), verbose);
+        PRV3(printf("Cookie : %d\n", ntohl(cookie)), verbose);
         break;
 
     case COOKIE_ACK:
@@ -214,7 +214,7 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
             verbose);
         packet += sizeof(struct sctp_chunk_hdr);
         uint32_t cookie_ack = *(uint32_t *)packet;
-        PRV3(printf("\t- Cookie : %d\n", ntohl(cookie_ack)), verbose);
+        PRV3(printf("Cookie : %d\n", ntohl(cookie_ack)), verbose);
         break;
 
     case ECNE:
@@ -223,7 +223,7 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
              verbose);
         packet += sizeof(struct sctp_chunk_hdr);
         uint32_t ecne = *(uint32_t *)packet;
-        PRV3(printf("\t- ECNE : %d\n", ntohl(ecne)), verbose);
+        PRV3(printf("ECNE : %d\n", ntohl(ecne)), verbose);
         break;
 
     case CWR:
@@ -232,7 +232,7 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
              verbose);
         packet += sizeof(struct sctp_chunk_hdr);
         uint32_t cwr = *(uint32_t *)packet;
-        PRV3(printf("\t- CWR : %d\n", ntohl(cwr)), verbose);
+        PRV3(printf("CWR : %d\n", ntohl(cwr)), verbose);
         break;
 
     case SHUTDOWN_COMPLETE:
@@ -240,7 +240,7 @@ void sctp_chunk_analyzer(const u_char *packet, int nb_chunks,
              verbose);
         packet += sizeof(struct sctp_chunk_hdr);
         uint32_t shutdown_complete = *(uint32_t *)packet;
-        PRV3(printf("\t- Cumulative TSN acknowledgement : %d\n",
+        PRV3(printf("Cumulative TSN acknowledgement : %d\n",
                     ntohl(shutdown_complete)),
              verbose);
         break;
