@@ -1,4 +1,8 @@
-# Network Frame Filter
+# <img src="assets/icon.png" alt="icon" width="6%"/> NetworkFrameFilter 
+[![version](https://img.shields.io/badge/version-0.0.1-blue.svg)](https://github.com/EthanAndreas/NetworkFrameFilter)
+[![compiler](https://img.shields.io/badge/compiler-gcc-red.svg)](https://github.com/EthanAndreas/NetworkFrameFilter/blob/main/Makefile)
+[![license](https://img.shields.io/badge/license-GPL_3.0-yellow.svg)](https://github.com/EthanAndreas/NetworkFrameFilter/blob/main/LICENSE)
+[![author](https://img.shields.io/badge/author-EthanAndreas-blue)](https://github.com/EthanAndreas)
 
 Analyze network frame on severals protocols such as Bootp, DNS, SMTP, DHCP etc... <br />
 (refer to the documentation for the protocols supported). <br />
